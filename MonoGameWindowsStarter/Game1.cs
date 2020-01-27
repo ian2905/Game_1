@@ -81,17 +81,18 @@ namespace MonoGameWindowsStarter
                 Exit();
 
             // TODO: Add your update logic here
-            ballPosition = (float)gameTime.ElapsedGameTime.TotalMilliseconds * ballVelocity;
+            ballPosition += (float)gameTime.ElapsedGameTime.TotalMilliseconds * ballVelocity;
+            Console.WriteLine("X = " + ballVelocity.X + ", Y = " + ballPosition.Y);
 
             //Check for wall collisions
-            if(ballPosition.Y < - 100)
+            if(ballPosition.Y < -100)
             {
                 ballVelocity.Y *= -1;
                 float delta = 0 - ballPosition.Y;
                 ballPosition.Y += 2 * delta;
             }
 
-            if (ballPosition.Y > graphics.PreferredBackBufferHeight)
+            if (ballPosition.Y > graphics.PreferredBackBufferHeight - 100)
             {
                 ballVelocity.Y *= -1;
                 float delta = graphics.PreferredBackBufferHeight - 100 - ballPosition.Y;
@@ -105,7 +106,7 @@ namespace MonoGameWindowsStarter
                 ballPosition.X += 2 * delta;
             }
 
-            if (ballPosition.X > graphics.PreferredBackBufferWidth)
+            if (ballPosition.X > graphics.PreferredBackBufferWidth - 100)
             {
                 ballVelocity.X *= -1;
                 float delta = graphics.PreferredBackBufferWidth - 100 - ballPosition.X;
