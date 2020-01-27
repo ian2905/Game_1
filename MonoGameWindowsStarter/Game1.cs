@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
@@ -11,7 +12,11 @@ namespace MonoGameWindowsStarter
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        Random random = new Random();
         Texture2D ball;
+        Vector2 ballPosition = Vector2.Zero;
+        Vector2 ballVelocity;
+
 
         public Game1()
         {
@@ -31,6 +36,11 @@ namespace MonoGameWindowsStarter
             graphics.PreferredBackBufferWidth = 1042;
             graphics.PreferredBackBufferHeight = 768;
             graphics.ApplyChanges();
+
+            ballVelocity = new Vector2(
+                (float)random.NextDouble(),
+                (float)random.NextDouble()
+            );
 
             base.Initialize();
         }
@@ -67,7 +77,40 @@ namespace MonoGameWindowsStarter
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
+            if (Keyboard.GetState().IsKeyDown(Keys.Escape))
+                Exit();
+
             // TODO: Add your update logic here
+            ballPosition = (float)gameTime.ElapsedGameTime.TotalMilliseconds * ballVelocity;
+
+            //Check for wall collisions
+            if(ballPosition.Y < - 100)
+            {
+                ballVelocity.Y *= -1;
+                float delta = 0 - ballPosition.Y;
+                ballPosition.Y += 2 * delta;
+            }
+
+            if (ballPosition.Y > graphics.PreferredBackBufferHeight)
+            {
+                ballVelocity.Y *= -1;
+                float delta = graphics.PreferredBackBufferHeight - 100 - ballPosition.Y;
+                ballPosition.Y += 2 * delta;
+            }
+
+            if (ballPosition.X < -100)
+            {
+                ballVelocity.X *= -1;
+                float delta = 0 - ballPosition.X;
+                ballPosition.X += 2 * delta;
+            }
+
+            if (ballPosition.X > graphics.PreferredBackBufferWidth)
+            {
+                ballVelocity.X *= -1;
+                float delta = graphics.PreferredBackBufferWidth - 100 - ballPosition.X;
+                ballPosition.X += 2 * delta;
+            }
 
             base.Update(gameTime);
         }
@@ -82,7 +125,7 @@ namespace MonoGameWindowsStarter
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
-            spriteBatch.Draw(ball, new Rectangle(100, 100, 100, 100), Color.White);
+            spriteBatch.Draw(ball, new Rectangle(100 + (int)ballPosition.X, 100 + (int)ballPosition.Y, 100, 100), Color.White);
             // All draws in here
             spriteBatch.End();
 
