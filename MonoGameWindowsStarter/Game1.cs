@@ -85,7 +85,7 @@ namespace MonoGameWindowsStarter
             Console.WriteLine("X = " + ballVelocity.X + ", Y = " + ballPosition.Y);
 
             //Check for wall collisions
-            if(ballPosition.Y < -100)
+            if(ballPosition.Y < 0)
             {
                 ballVelocity.Y *= -1;
                 float delta = 0 - ballPosition.Y;
@@ -99,7 +99,7 @@ namespace MonoGameWindowsStarter
                 ballPosition.Y += 2 * delta;
             }
 
-            if (ballPosition.X < -100)
+            if (ballPosition.X < 0)
             {
                 ballVelocity.X *= -1;
                 float delta = 0 - ballPosition.X;
@@ -126,7 +126,7 @@ namespace MonoGameWindowsStarter
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
-            spriteBatch.Draw(ball, new Rectangle(100 + (int)ballPosition.X, 100 + (int)ballPosition.Y, 100, 100), Color.White);
+            spriteBatch.Draw(ball, new Rectangle((int)ballPosition.X, (int)ballPosition.Y, 100, 100), Color.White);
             // All draws in here
             spriteBatch.End();
 
