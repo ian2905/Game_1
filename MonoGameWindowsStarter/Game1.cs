@@ -152,6 +152,18 @@ namespace MonoGameWindowsStarter
                 ballPosition.X += 2 * delta;
             }
 
+            /*
+            if(paddleRect.Y <= 0)
+            {
+                paddleSpeed = 0;
+                paddleRect.Y = 1;
+            }
+            if (paddleRect.Y >= graphics.PreferredBackBufferHeight - paddleRect.Height)
+            {
+                paddleSpeed = 0;
+                paddleRect.Y = graphics.PreferredBackBufferHeight - paddleRect.Height - 1;
+            }
+            */
 
             oldKeyboardState = newKeyboardState;
             base.Update(gameTime);
