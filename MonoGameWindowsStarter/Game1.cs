@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -10,15 +11,20 @@ namespace MonoGameWindowsStarter
     /// </summary>
     public class Game1 : Game
     {
+        static int MAX_ENEMIES = 100;
+
+
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         Random random = new Random();
-        Texture2D projectileSprite;
-        Vector2 ballPosition = Vector2.Zero;
-        Vector2 ballVelocity;
 
+        Texture2D projectileSprite;
         Texture2D dummySprite;
+
         Player player;
+        List<Enemy> enemies;
+        List<Projectile> projectiles;
+
 
         KeyboardState oldKeyboardState;
         KeyboardState newKeyboardState;
@@ -43,13 +49,11 @@ namespace MonoGameWindowsStarter
             graphics.PreferredBackBufferHeight = 768;
             graphics.ApplyChanges();
 
-            ballVelocity = new Vector2(
-                (float)random.NextDouble(),
-                (float)random.NextDouble()
-            );
-
             player = new Player(dummySprite, new Rectangle(graphics.PreferredBackBufferWidth / 2,
                                             graphics.PreferredBackBufferHeight / 2, 35, 35), new Vector2(0, 0));
+
+            projectiles = new List<Projectile>();
+            enemies = new List<Enemy>();
 
 
             base.Initialize();
@@ -96,6 +100,16 @@ namespace MonoGameWindowsStarter
                 Exit();
 
             player.update(newKeyboardState, oldKeyboardState, graphics);
+            foreach(Enemy e in enemies)
+            {
+                e.update(player, graphics);
+            }
+            foreach(Projectile p in projectiles)
+            {
+                p.update(graphics);
+            }
+
+            manageCollision();
 
 
 
@@ -106,7 +120,7 @@ namespace MonoGameWindowsStarter
 
 
 
-
+            /*
             // TODO: Add your update logic here
             ballPosition += (float)gameTime.ElapsedGameTime.TotalMilliseconds * ballVelocity;
 
@@ -138,7 +152,7 @@ namespace MonoGameWindowsStarter
                 float delta = graphics.PreferredBackBufferWidth - 100 - ballPosition.X;
                 ballPosition.X += 2 * delta;
             }
-
+            */
 
             oldKeyboardState = newKeyboardState;
             base.Update(gameTime);
@@ -163,7 +177,7 @@ namespace MonoGameWindowsStarter
             base.Draw(gameTime);
         }
 
-        private void manageCollision(Player player, Projectile[] projectiles, Enemy[] enemies)
+        private void manageCollision()
         {
 
         }

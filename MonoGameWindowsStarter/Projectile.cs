@@ -9,9 +9,16 @@ using Microsoft.Xna.Framework.Input;
 
 namespace MonoGameWindowsStarter
 {
+    public enum Shot
+    {
+        Player,
+        Enemy
+    }
     public struct Projectile
     {
+
         static int SPEED = 20;
+
 
         public Texture2D sprite;
         public float X;
@@ -21,6 +28,7 @@ namespace MonoGameWindowsStarter
         public Vector2 Velocity;
         public BoundingCircle hitBox;
 
+        public Shot ShotType;
         public bool OffScreen;
 
         public Vector2 Center
@@ -33,7 +41,7 @@ namespace MonoGameWindowsStarter
             }
         }
 
-        public Projectile(Texture2D sprite, float x, float y, float radius, Vector2 velocity)
+        public Projectile(Texture2D sprite, float x, float y, float radius, Vector2 velocity, Shot shotType)
         {
             this.sprite = sprite;
             this.X = x;
@@ -41,6 +49,7 @@ namespace MonoGameWindowsStarter
             this.Radius = radius;
             this.Velocity = velocity;
             this.OffScreen = false;
+            this.ShotType = shotType;
             this.hitBox = new BoundingCircle(x, y, radius);
         }
 
