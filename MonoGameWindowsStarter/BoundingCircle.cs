@@ -21,6 +21,25 @@ namespace MonoGameWindowsStarter
             }
         }
 
+        public BoundingCircle(float x, float y, float radius)
+        {
+            this.X = x;
+            this.Y = y;
+            this.Radius = radius;
+        }
+
+        public bool CollidesWith(BoundingCircle other)
+        {
+            return Math.Pow((this.Radius + other.Radius), 2) >= Math.Pow((this.Center.Y - other.Center.Y), 2) + Math.Pow((this.Center.X - other.Center.X), 2);
+        }
+
+        public bool CollidesWith(BoundingRectangle other)
+        {
+            float nearestX = Math.Max(other.X, Math.Min(this.Center.X, other.X + other.Width));
+            float nearestY = Math.Max(other.Y, Math.Min(this.Center.Y, other.Y + other.Height));
+            return Math.Pow((this.Center.X - nearestX), 2) + Math.Pow((this.Center.Y - nearestY), 2) < Math.Pow(this.Radius, 2);
+        }
+
 
     }
 }

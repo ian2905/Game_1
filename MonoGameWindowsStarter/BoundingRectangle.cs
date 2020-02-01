@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Xna.Framework
+using Microsoft.Xna.Framework;
 
 namespace MonoGameWindowsStarter
 {
@@ -25,6 +25,13 @@ namespace MonoGameWindowsStarter
         public bool CollidesWith(BoundingRectangle other)
         {
             return !(this.X > other.X + other.Width || this.X + this.Width < other.X || this.Y > other.Y + other.Height || this.Y + this.Height < other.Y);
+        }
+
+        public bool CollidesWith(BoundingCircle other)
+        {
+            float nearestX = Math.Max(other.X, Math.Min(other.Center.X, this.X + this.Width));
+            float nearestY = Math.Max(other.Y, Math.Min(other.Center.Y, this.Y + this.Height));
+            return Math.Pow((other.Center.X - nearestX), 2) + Math.Pow((other.Center.Y - nearestY), 2) < Math.Pow(other.Radius, 2);
         }
     }
 }
