@@ -16,14 +16,16 @@ namespace MonoGameWindowsStarter
         static int SPEEDCAP = 50;
 
         public Texture2D sprite;
-        public Rectangle playerRect;
-        public Vector2 playerVelocity;
+        public Rectangle rect;
+        public Vector2 velocity;
+        public BoundingRectangle hitBox;
 
         public Player(Texture2D sprite, Rectangle size, Vector2 velocity)
         {
             this.sprite = sprite;
-            this.playerRect = size;
-            this.playerVelocity = velocity;
+            this.rect = size;
+            this.velocity = velocity;
+            this.hitBox = new BoundingRectangle(size.X, size.Y, size.Width, size.Height);
         }
 
         public void setSprite(Texture2D sprite)
@@ -37,74 +39,74 @@ namespace MonoGameWindowsStarter
             //Keyboard Input
             if (newKeyboardState.IsKeyDown(Keys.Up))
             {
-                playerVelocity.Y -= ACCELERATION;
+                velocity.Y -= ACCELERATION;
             }
 
             if (newKeyboardState.IsKeyDown(Keys.Down))
             {
-                playerVelocity.Y += ACCELERATION;
+                velocity.Y += ACCELERATION;
             }
             if (newKeyboardState.IsKeyDown(Keys.Left))
             {
-                playerVelocity.X -= ACCELERATION;
+                velocity.X -= ACCELERATION;
             }
 
             if (newKeyboardState.IsKeyDown(Keys.Right))
             {
-                playerVelocity.X += ACCELERATION;
+                velocity.X += ACCELERATION;
             }
 
             
 
             //Player Restrictions
 
-            if (playerRect.Y < 0)
+            if (rect.Y < 0)
             {
-                playerVelocity.Y = 0;
-                playerRect.Y = 0;
+                velocity.Y = 0;
+                rect.Y = 0;
             }
-            if (playerRect.Y > graphics.PreferredBackBufferHeight - playerRect.Height)
+            if (rect.Y > graphics.PreferredBackBufferHeight - rect.Height)
             {
-                playerVelocity.Y = 0;
-                playerRect.Y = graphics.PreferredBackBufferHeight - playerRect.Height;
+                velocity.Y = 0;
+                rect.Y = graphics.PreferredBackBufferHeight - rect.Height;
             }
-            if (playerRect.X < 0)
+            if (rect.X < 0)
             {
-                playerVelocity.X = 0;
-                playerRect.X = 0;
+                velocity.X = 0;
+                rect.X = 0;
             }
-            if (playerRect.X > graphics.PreferredBackBufferWidth - playerRect.Width)
+            if (rect.X > graphics.PreferredBackBufferWidth - rect.Width)
             {
-                playerVelocity.X = 0;
-                playerRect.X = graphics.PreferredBackBufferWidth - playerRect.Width;
+                velocity.X = 0;
+                rect.X = graphics.PreferredBackBufferWidth - rect.Width;
             }
 
             //Physics
-            if (playerVelocity.X > 0)
+            if (velocity.X > 0)
             {
-                playerVelocity.X -= FRICTION;
+                velocity.X -= FRICTION;
             }
-            if (playerVelocity.Y > 0)
+            if (velocity.Y > 0)
             {
-                playerVelocity.Y -= FRICTION;
+                velocity.Y -= FRICTION;
             }
-            if (playerVelocity.X < 0)
+            if (velocity.X < 0)
             {
-                playerVelocity.X += FRICTION;
+                velocity.X += FRICTION;
             }
-            if (playerVelocity.Y < 0)
+            if (velocity.Y < 0)
             {
-                playerVelocity.Y += FRICTION;
+                velocity.Y += FRICTION;
             }
 
             //Final Update
-            if (playerVelocity.Y < SPEEDCAP)
+            if (velocity.Y < SPEEDCAP)
             {
-                playerRect.Y += (int)playerVelocity.Y;
+                rect.Y += (int)velocity.Y;
             }
-            if (playerVelocity.X < SPEEDCAP)
+            if (velocity.X < SPEEDCAP)
             {
-                playerRect.X += (int)playerVelocity.X;
+                rect.X += (int)velocity.X;
             }
         }
     }

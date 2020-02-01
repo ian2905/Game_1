@@ -13,7 +13,7 @@ namespace MonoGameWindowsStarter
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         Random random = new Random();
-        Texture2D ball;
+        Texture2D projectileSprite;
         Vector2 ballPosition = Vector2.Zero;
         Vector2 ballVelocity;
 
@@ -65,7 +65,7 @@ namespace MonoGameWindowsStarter
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
-            ball = Content.Load<Texture2D>("ball");
+            projectileSprite = Content.Load<Texture2D>("ball");
             player.setSprite(Content.Load<Texture2D>("OnePixel"));
         }
 
@@ -96,6 +96,15 @@ namespace MonoGameWindowsStarter
                 Exit();
 
             player.update(newKeyboardState, oldKeyboardState, graphics);
+
+
+
+
+
+
+
+
+
 
 
             // TODO: Add your update logic here
@@ -146,12 +155,17 @@ namespace MonoGameWindowsStarter
             // TODO: Add your drawing code here
             spriteBatch.Begin();
             // spriteBatch.Draw(ball, new Rectangle((int)ballPosition.X, (int)ballPosition.Y, 100, 100), Color.White);
-            spriteBatch.Draw(player.sprite, player.playerRect, Color.Red);
+            spriteBatch.Draw(player.sprite, player.rect, Color.Red);
 
             // All draws in here
             spriteBatch.End();
 
             base.Draw(gameTime);
+        }
+
+        private void manageCollision(Player player, Projectile[] projectiles, Enemy[] enemies)
+        {
+
         }
     }
 }
