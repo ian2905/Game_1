@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace MonoGameWindowsStarter
 {
-    public struct Player
+    public class Player
     {
         static float FRICTION = (float).4;
         static int ACCELERATION = 1;

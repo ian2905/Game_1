@@ -14,10 +14,8 @@ namespace MonoGameWindowsStarter
         Player,
         Enemy
     }
-    public struct Projectile
+    public class Projectile
     {
-
-        static int SPEED = 20;
 
 
         public Texture2D sprite;
@@ -87,7 +85,26 @@ namespace MonoGameWindowsStarter
             Y += Velocity.Y;
             Rect.X += (int)Velocity.X;
             Rect.Y += (int)Velocity.Y;
+            /*
+            if (Velocity.X != 0)
+            {
+                Rect.X += (int)(SPEED * (Velocity.X / (Velocity.X + Velocity.Y)) + Velocity.X);
+            }
+            else
+            {
+                Rect.X += (int)Velocity.X;
+            }
+
+            if (Velocity.Y != 0)
+            {
+                Rect.Y += (int)(SPEED * (Velocity.Y / (Velocity.X + Velocity.Y)) + Velocity.Y);
+            }
+            else
+            {
+                Rect.Y += (int)Velocity.Y;
+            }
             //Console.WriteLine(Rect);
+            */
         }
     }
 }

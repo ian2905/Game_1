@@ -12,7 +12,9 @@ namespace MonoGameWindowsStarter
     public class Game1 : Game
     {
         static int MAX_ENEMIES = 100;
+        static int MAX_PROJECTILES = 1000;
         static int PROJECTILE_SIZE = 10;
+        static int PROJECTILE_SPEED = 5;
         static int SHOT_RATE = 250;
 
         bool createdEnemy = false;
@@ -28,8 +30,8 @@ namespace MonoGameWindowsStarter
         Texture2D dummySprite;
 
         Player player;
-        List<Enemy> enemies;
-        List<Projectile> projectiles;
+        Enemy[] enemies;
+        Projectile[] projectiles;
 
 
         KeyboardState oldKeyboardState;
@@ -58,9 +60,9 @@ namespace MonoGameWindowsStarter
             player = new Player(dummySprite, new Rectangle(graphics.PreferredBackBufferWidth / 2,
                                             graphics.PreferredBackBufferHeight / 2, 35, 35), new Vector2(0, 0));
 
-            projectiles = new List<Projectile>();
-            enemies = new List<Enemy>();
-            testEnemy = new Enemy(enemySprite, new Rectangle(0, 0, 35, 35));
+            projectiles = new Projectile[MAX_PROJECTILES];
+            enemies = new Enemy[MAX_ENEMIES];
+            //testEnemy = new Enemy(enemySprite, new Rectangle(0, 0, 35, 35));
 
 
             base.Initialize();
@@ -78,7 +80,7 @@ namespace MonoGameWindowsStarter
             // TODO: use this.Content to load your game content here
             projectileSprite = Content.Load<Texture2D>("ball");
             enemySprite = Content.Load<Texture2D>("OnePixel");
-            testEnemy.setSprite(enemySprite);
+            //testEnemy.setSprite(enemySprite);
             player.setSprite(Content.Load<Texture2D>("OnePixel"));
         }
 
@@ -108,76 +110,32 @@ namespace MonoGameWindowsStarter
             if (Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            //Handle Deletion
-            foreach(Enemy e in enemies)
-            {
-                if (e.Hit)
-                {
-                    enemies.Remove(e);
-                }
-            }
-            foreach(Projectile p in projectiles)
-            {
-                if (p.OffScreen)
-                {
-                    projectiles.Remove(p);
-                }
-            }
 
-            //Handle Enemy Creation
-            if (!createdEnemy)
-            {
-                enemies.Add(new Enemy(enemySprite, new Rectangle(0, 0, 35, 35)));
-                createdEnemy = true;
-            }
-            
             //Handle Projectile Creation
-            if (newKeyboardState.IsKeyDown(Keys.Right) && !oldKeyboardState.IsKeyDown(Keys.Right) && gameTime.TotalGameTime.TotalMilliseconds - player.shotTime > SHOT_RATE)
-            {
-                projectiles.Add(new Projectile(projectileSprite, player.Rect.X + player.Rect.Width + PROJECTILE_SIZE, player.Rect.Y + (player.Rect.Height / 2), PROJECTILE_SIZE, player.Velocity, Shot.Player));
-                player.shotTime = gameTime.TotalGameTime.TotalMilliseconds;
-            }
-            if (newKeyboardState.IsKeyDown(Keys.Left) && !oldKeyboardState.IsKeyDown(Keys.Left) && gameTime.TotalGameTime.TotalMilliseconds - player.shotTime > SHOT_RATE)
-            {
-                projectiles.Add(new Projectile(projectileSprite, player.Rect.X - PROJECTILE_SIZE, player.Rect.Y + (player.Rect.Height / 2), PROJECTILE_SIZE, player.Velocity, Shot.Player));
-                player.shotTime = gameTime.TotalGameTime.TotalMilliseconds;
-            }
-            if (newKeyboardState.IsKeyDown(Keys.Up) && !oldKeyboardState.IsKeyDown(Keys.Up) && gameTime.TotalGameTime.TotalMilliseconds - player.shotTime > SHOT_RATE)
-            {
-                projectiles.Add(new Projectile(projectileSprite, player.Rect.X + (player.Rect.Width/2), player.Rect.Y - PROJECTILE_SIZE, PROJECTILE_SIZE, player.Velocity, Shot.Player));
-                player.shotTime = gameTime.TotalGameTime.TotalMilliseconds;
-            }
-            if (newKeyboardState.IsKeyDown(Keys.Down) && !oldKeyboardState.IsKeyDown(Keys.Down) && gameTime.TotalGameTime.TotalMilliseconds - player.shotTime > SHOT_RATE)
-            {
-                projectiles.Add(new Projectile(projectileSprite, player.Rect.X + (player.Rect.Width / 2), player.Rect.Y + player.Rect.Height + PROJECTILE_SIZE, PROJECTILE_SIZE, player.Velocity, Shot.Player));
-                player.shotTime = gameTime.TotalGameTime.TotalMilliseconds;
-            }
+            createProjectiles(gameTime);
 
             //Update Positions
             if (!player.Hit)
             {
                 player.update(newKeyboardState, oldKeyboardState, graphics);
-                testEnemy.update(player, graphics);
+                //testEnemy.update(player, graphics);
                 foreach (Enemy e in enemies)
                 {
-                    //e.update(player, graphics);
+                    if(e != null)
+                    {
+                        //e.update(player, graphics);
+                    }
                 }
                 foreach (Projectile p in projectiles)
                 {
-                    p.update(graphics);
+                    if(p != null)
+                    {
+                        p.update(graphics);
+                    }
                 }
 
                 manageCollision();
             }
-
-
-
-
-
-
-
-
-
 
 
 
@@ -199,11 +157,17 @@ namespace MonoGameWindowsStarter
             spriteBatch.Draw(player.Sprite, player.Rect, Color.Green);
             foreach(Enemy e in enemies)
             {
-                spriteBatch.Draw(e.Sprite, e.Rect, Color.Red);
+                if(e != null)
+                {
+                    spriteBatch.Draw(e.Sprite, e.Rect, Color.Red);
+                }
             }
             foreach(Projectile p in projectiles)
             {
-                spriteBatch.Draw(p.sprite, p.Rect, Color.White);
+                if(p != null)
+                {
+                    spriteBatch.Draw(p.sprite, p.Rect, Color.White);
+                }
             }
 
             // All draws in here
@@ -212,24 +176,99 @@ namespace MonoGameWindowsStarter
             base.Draw(gameTime);
         }
 
+        private void createProjectiles(GameTime gameTime)
+        {
+            //Shoot Right
+            if (newKeyboardState.IsKeyDown(Keys.Right) && !oldKeyboardState.IsKeyDown(Keys.Right) && gameTime.TotalGameTime.TotalMilliseconds - player.shotTime > SHOT_RATE)
+            {
+                for (int i = 0; i < MAX_PROJECTILES; i++)
+                {
+                    if (projectiles[i] == null || projectiles[i].OffScreen)
+                    {
+                        projectiles[i] = new Projectile(projectileSprite, player.Rect.X + player.Rect.Width, player.Rect.Y + (player.Rect.Height / 2) - (PROJECTILE_SIZE), PROJECTILE_SIZE, new Vector2(Math.Max(player.Velocity.X, 0) + PROJECTILE_SPEED, player.Velocity.Y), Shot.Player);
+                        break;
+                    }
+                    else if (i == MAX_PROJECTILES - 1)
+                    {
+                        projectiles[0] = new Projectile(projectileSprite, player.Rect.X + player.Rect.Width, player.Rect.Y + (player.Rect.Height / 2) - (PROJECTILE_SIZE), PROJECTILE_SIZE, new Vector2(Math.Max(player.Velocity.X, 0) + PROJECTILE_SPEED, player.Velocity.Y), Shot.Player);
+                    }
+                }
+                player.shotTime = gameTime.TotalGameTime.TotalMilliseconds;
+            }
+            //Shoot Left
+            if (newKeyboardState.IsKeyDown(Keys.Left) && !oldKeyboardState.IsKeyDown(Keys.Left) && gameTime.TotalGameTime.TotalMilliseconds - player.shotTime > SHOT_RATE)
+            {
+                for (int i = 0; i < MAX_PROJECTILES; i++)
+                {
+                    if (projectiles[i] == null || projectiles[i].OffScreen)
+                    {
+                        projectiles[i] = new Projectile(projectileSprite, player.Rect.X - 2 * PROJECTILE_SIZE, player.Rect.Y + (player.Rect.Height / 2) - (PROJECTILE_SIZE), PROJECTILE_SIZE, new Vector2(Math.Min(player.Velocity.X, 0) - PROJECTILE_SPEED, player.Velocity.Y), Shot.Player);
+                        break;
+                    }
+                    else if (i == MAX_PROJECTILES - 1)
+                    {
+                        projectiles[0] = new Projectile(projectileSprite, player.Rect.X - 2 * PROJECTILE_SIZE, player.Rect.Y + (player.Rect.Height / 2) - (PROJECTILE_SIZE), PROJECTILE_SIZE, new Vector2(Math.Min(player.Velocity.X, 0) - PROJECTILE_SPEED, player.Velocity.Y), Shot.Player);
+                    }
+                }
+                player.shotTime = gameTime.TotalGameTime.TotalMilliseconds;
+            }
+            //Shoot Up
+            if (newKeyboardState.IsKeyDown(Keys.Up) && !oldKeyboardState.IsKeyDown(Keys.Up) && gameTime.TotalGameTime.TotalMilliseconds - player.shotTime > SHOT_RATE)
+            {
+                for (int i = 0; i < MAX_PROJECTILES; i++)
+                {
+                    if (projectiles[i] == null || projectiles[i].OffScreen)
+                    {
+                        projectiles[i] = new Projectile(projectileSprite, player.Rect.X + (player.Rect.Width / 2) - (PROJECTILE_SIZE), player.Rect.Y - 2 * PROJECTILE_SIZE, PROJECTILE_SIZE, new Vector2(player.Velocity.X, Math.Min(player.Velocity.Y, 0) - PROJECTILE_SPEED), Shot.Player);
+                        break;
+                    }
+                    else if (i == MAX_PROJECTILES - 1)
+                    {
+                        projectiles[0] = new Projectile(projectileSprite, player.Rect.X + (player.Rect.Width / 2) - (PROJECTILE_SIZE), player.Rect.Y - 2 * PROJECTILE_SIZE, PROJECTILE_SIZE, new Vector2(player.Velocity.X, Math.Min(player.Velocity.Y, 0) - PROJECTILE_SPEED), Shot.Player);
+                    }
+                }
+                player.shotTime = gameTime.TotalGameTime.TotalMilliseconds;
+            }
+            //Shoot Down
+            if (newKeyboardState.IsKeyDown(Keys.Down) && !oldKeyboardState.IsKeyDown(Keys.Down) && gameTime.TotalGameTime.TotalMilliseconds - player.shotTime > SHOT_RATE)
+            {
+                for (int i = 0; i < MAX_PROJECTILES; i++)
+                {
+                    if (projectiles[i] == null || projectiles[i].OffScreen)
+                    {
+                        projectiles[i] = new Projectile(projectileSprite, player.Rect.X + (player.Rect.Width / 2) - (PROJECTILE_SIZE), player.Rect.Y + player.Rect.Height, PROJECTILE_SIZE, new Vector2(player.Velocity.X, Math.Max(player.Velocity.Y, 0) + PROJECTILE_SPEED), Shot.Player);
+                        break;
+                    }
+                    else if (i == MAX_PROJECTILES - 1)
+                    {
+                        projectiles[0] = new Projectile(projectileSprite, player.Rect.X + (player.Rect.Width / 2) - (PROJECTILE_SIZE), player.Rect.Y + player.Rect.Height, PROJECTILE_SIZE, new Vector2(player.Velocity.X, Math.Max(player.Velocity.Y, 0) + PROJECTILE_SPEED), Shot.Player);
+                    }
+                }
+                player.shotTime = gameTime.TotalGameTime.TotalMilliseconds;
+            }
+        }
+
         private void manageCollision()
         {
             foreach(Projectile p in projectiles)
             {
-                if(p.ShotType == Shot.Enemy)
+                if(p != null)
                 {
-                    if(p.hitBox.CollidesWith(player.HitBox))
+                    if (p.ShotType == Shot.Enemy)
                     {
-                        player.Hit = true;
-                    }
-                }
-                else
-                {
-                    foreach(Enemy e in enemies)
-                    {
-                        if (p.hitBox.CollidesWith(e.HitBox))
+                        if (p.hitBox.CollidesWith(player.HitBox))
                         {
-                            e.hit();
+                            player.Hit = true;
+                        }
+                    }
+                    else
+                    {
+                        foreach (Enemy e in enemies)
+                        {
+                            if (e != null && p.hitBox.CollidesWith(e.HitBox))
+                            {
+                                e.hit();
+                            }
                         }
                     }
                 }
@@ -237,7 +276,7 @@ namespace MonoGameWindowsStarter
 
             foreach(Enemy e in enemies)
             {
-                if (e.HitBox.CollidesWith(player.HitBox))
+                if (e != null && e.HitBox.CollidesWith(player.HitBox))
                 {
                     player.hit();
                 }

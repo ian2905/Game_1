@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace MonoGameWindowsStarter
 {
-    public struct Enemy
+    public class Enemy
     {
         static float SPEEDCAP = 10;
 
