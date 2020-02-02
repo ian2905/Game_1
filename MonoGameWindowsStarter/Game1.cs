@@ -12,13 +12,12 @@ namespace MonoGameWindowsStarter
     public class Game1 : Game
     {
         static int MAX_ENEMIES = 100;
-        static int MAX_PROJECTILES = 1000;
+        static int MAX_PROJECTILES = 500;
         static int PROJECTILE_SIZE = 10;
         static int PROJECTILE_SPEED = 5;
         static int SHOT_RATE = 250;
-
-        bool createdEnemy = false;
-        Enemy testEnemy;
+        static int ENEMY_SPAWN_RATE = 2000;
+        static int PLAYER_SIZE = 32;
 
 
         GraphicsDeviceManager graphics;
@@ -36,6 +35,8 @@ namespace MonoGameWindowsStarter
 
         KeyboardState oldKeyboardState;
         KeyboardState newKeyboardState;
+
+        double enemyCounter = 0;
 
 
         public Game1()
@@ -58,11 +59,10 @@ namespace MonoGameWindowsStarter
             graphics.ApplyChanges();
 
             player = new Player(dummySprite, new Rectangle(graphics.PreferredBackBufferWidth / 2,
-                                            graphics.PreferredBackBufferHeight / 2, 35, 35), new Vector2(0, 0));
+                                            graphics.PreferredBackBufferHeight / 2, PLAYER_SIZE, PLAYER_SIZE), new Vector2(0, 0));
 
             projectiles = new Projectile[MAX_PROJECTILES];
             enemies = new Enemy[MAX_ENEMIES];
-            //testEnemy = new Enemy(enemySprite, new Rectangle(0, 0, 35, 35));
 
 
             base.Initialize();
@@ -80,7 +80,6 @@ namespace MonoGameWindowsStarter
             // TODO: use this.Content to load your game content here
             projectileSprite = Content.Load<Texture2D>("ball");
             enemySprite = Content.Load<Texture2D>("OnePixel");
-            //testEnemy.setSprite(enemySprite);
             player.setSprite(Content.Load<Texture2D>("OnePixel"));
         }
 
@@ -110,6 +109,20 @@ namespace MonoGameWindowsStarter
             if (Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
+            //Handle Enemy Creation
+            if(gameTime.TotalGameTime.TotalMilliseconds - enemyCounter > ENEMY_SPAWN_RATE)
+            {
+                Vector2 spawnPoint = calcEnemySpawn();
+                for(int i = 0; i < MAX_ENEMIES; i++)
+                {
+                    if(enemies[i] == null || enemies[i].Hit)
+                    {
+                        enemies[i] = new Enemy(enemySprite, new Rectangle((int)spawnPoint.X, (int)spawnPoint.Y, PLAYER_SIZE, PLAYER_SIZE));
+                        break;
+                    }
+                }
+                enemyCounter = gameTime.TotalGameTime.TotalMilliseconds;
+            }
 
             //Handle Projectile Creation
             createProjectiles(gameTime);
@@ -118,12 +131,11 @@ namespace MonoGameWindowsStarter
             if (!player.Hit)
             {
                 player.update(newKeyboardState, oldKeyboardState, graphics);
-                //testEnemy.update(player, graphics);
                 foreach (Enemy e in enemies)
                 {
                     if(e != null)
                     {
-                        //e.update(player, graphics);
+                        e.update(player, graphics);
                     }
                 }
                 foreach (Projectile p in projectiles)
@@ -157,14 +169,14 @@ namespace MonoGameWindowsStarter
             spriteBatch.Draw(player.Sprite, player.Rect, Color.Green);
             foreach(Enemy e in enemies)
             {
-                if(e != null)
+                if(e != null && !e.Hit)
                 {
                     spriteBatch.Draw(e.Sprite, e.Rect, Color.Red);
                 }
             }
             foreach(Projectile p in projectiles)
             {
-                if(p != null)
+                if(p != null && !p.OffScreen)
                 {
                     spriteBatch.Draw(p.sprite, p.Rect, Color.White);
                 }
@@ -280,6 +292,31 @@ namespace MonoGameWindowsStarter
                 {
                     player.hit();
                 }
+            }
+        }
+
+        public Vector2 calcEnemySpawn()
+        {
+            int side = random.Next(3);
+            //Top
+            if(side == 0)
+            {
+                return new Vector2(random.Next(0 - PLAYER_SIZE, graphics.PreferredBackBufferWidth + PLAYER_SIZE*2), 0 - PLAYER_SIZE);
+            }
+            //Right
+            else if (side == 0)
+            {
+                return new Vector2(graphics.PreferredBackBufferHeight + PLAYER_SIZE, random.Next(0 - PLAYER_SIZE, graphics.PreferredBackBufferHeight + PLAYER_SIZE));
+            }
+            //Bottom
+            else if (side == 0)
+            {
+                return new Vector2(random.Next(0 - PLAYER_SIZE, graphics.PreferredBackBufferWidth + PLAYER_SIZE * 2), graphics.PreferredBackBufferHeight + PLAYER_SIZE);
+            }
+            //Left
+            else
+            {
+                return new Vector2(0 - PLAYER_SIZE, random.Next(0 - PLAYER_SIZE, graphics.PreferredBackBufferHeight + PLAYER_SIZE));
             }
         }
     }

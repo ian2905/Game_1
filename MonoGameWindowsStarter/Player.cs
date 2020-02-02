@@ -12,8 +12,8 @@ namespace MonoGameWindowsStarter
     public class Player
     {
         static float FRICTION = (float).4;
-        static int ACCELERATION = 1;
-        static int SPEEDCAP = 50;
+        static float ACCELERATION = (float).7;
+        static int SPEEDCAP = 40;
 
         public Texture2D Sprite;
         public Rectangle Rect;

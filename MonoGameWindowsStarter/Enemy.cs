@@ -11,7 +11,7 @@ namespace MonoGameWindowsStarter
 {
     public class Enemy
     {
-        static float SPEEDCAP = 10;
+        static float SPEEDCAP = 2;
 
         public Texture2D Sprite;
         public Rectangle Rect;
@@ -66,17 +66,19 @@ namespace MonoGameWindowsStarter
             //Physics
 
             //Final Update
-            Console.WriteLine(Rect);
-            Console.WriteLine((int)(SPEEDCAP * (playerDistence.X / Math.Abs(playerDistence.X + playerDistence.Y))));
-            Console.WriteLine((int)(SPEEDCAP * (playerDistence.Y / Math.Abs(playerDistence.X + playerDistence.Y))));
+            //Console.WriteLine(Rect);
+            //Console.WriteLine((int)(SPEEDCAP * (playerDistence.X / Math.Abs(playerDistence.X + playerDistence.Y))));
+            //Console.WriteLine((int)(SPEEDCAP * (playerDistence.Y / Math.Abs(playerDistence.X + playerDistence.Y))));
             Rect.X += (int)(SPEEDCAP * (playerDistence.X / Math.Abs(playerDistence.X + playerDistence.Y)));
             Rect.Y += (int)(SPEEDCAP * (playerDistence.Y / Math.Abs(playerDistence.X + playerDistence.Y)));
-            Console.WriteLine(Rect);
+            //Console.WriteLine(Rect);
         }
 
         private Vector2 trackPlayer(Player player)
         {
-            return new Vector2((player.Rect.X + player.Rect.Width/2) - this.Rect.X, (player.Rect.Y + player.Rect.Height / 2) - this.Rect.Y);
+            Console.WriteLine(player.Rect.X);
+
+            return new Vector2((player.Rect.X + player.Rect.Width / 2) - this.Rect.X, (player.Rect.Y + player.Rect.Height / 2) - this.Rect.Y);
         }
     }
 }
