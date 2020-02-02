@@ -15,98 +15,107 @@ namespace MonoGameWindowsStarter
         static int ACCELERATION = 1;
         static int SPEEDCAP = 50;
 
-        public Texture2D sprite;
-        public Rectangle rect;
-        public Vector2 velocity;
-        public BoundingRectangle hitBox;
+        public Texture2D Sprite;
+        public Rectangle Rect;
+        public Vector2 Velocity;
+        public BoundingRectangle HitBox;
+        public bool Hit;
+        public double shotTime;
 
         public Player(Texture2D sprite, Rectangle size, Vector2 velocity)
         {
-            this.sprite = sprite;
-            this.rect = size;
-            this.velocity = velocity;
-            this.hitBox = new BoundingRectangle(size.X, size.Y, size.Width, size.Height);
+            this.Sprite = sprite;
+            this.Rect = size;
+            this.Velocity = velocity;
+            this.HitBox = new BoundingRectangle(size.X, size.Y, size.Width, size.Height);
+            this.Hit = false;
+            this.shotTime = 0;
         }
 
         public void setSprite(Texture2D sprite)
         {
-            this.sprite = sprite;
+            this.Sprite = sprite;
+        }
+
+        public void hit()
+        {
+            Hit = true;
         }
 
         public void update(KeyboardState newKeyboardState, KeyboardState oldKeyboardState, GraphicsDeviceManager graphics)
         {
 
             //Keyboard Input
-            if (newKeyboardState.IsKeyDown(Keys.Up))
+            if (newKeyboardState.IsKeyDown(Keys.W))
             {
-                velocity.Y -= ACCELERATION;
+                Velocity.Y -= ACCELERATION;
             }
 
-            if (newKeyboardState.IsKeyDown(Keys.Down))
+            if (newKeyboardState.IsKeyDown(Keys.S))
             {
-                velocity.Y += ACCELERATION;
+                Velocity.Y += ACCELERATION;
             }
-            if (newKeyboardState.IsKeyDown(Keys.Left))
+            if (newKeyboardState.IsKeyDown(Keys.A))
             {
-                velocity.X -= ACCELERATION;
+                Velocity.X -= ACCELERATION;
             }
 
-            if (newKeyboardState.IsKeyDown(Keys.Right))
+            if (newKeyboardState.IsKeyDown(Keys.D))
             {
-                velocity.X += ACCELERATION;
+                Velocity.X += ACCELERATION;
             }
 
             
 
             //Player Restrictions
 
-            if (rect.Y < 0)
+            if (Rect.Y < 0)
             {
-                velocity.Y = 0;
-                rect.Y = 0;
+                Velocity.Y = 0;
+                Rect.Y = 0;
             }
-            if (rect.Y > graphics.PreferredBackBufferHeight - rect.Height)
+            if (Rect.Y > graphics.PreferredBackBufferHeight - Rect.Height)
             {
-                velocity.Y = 0;
-                rect.Y = graphics.PreferredBackBufferHeight - rect.Height;
+                Velocity.Y = 0;
+                Rect.Y = graphics.PreferredBackBufferHeight - Rect.Height;
             }
-            if (rect.X < 0)
+            if (Rect.X < 0)
             {
-                velocity.X = 0;
-                rect.X = 0;
+                Velocity.X = 0;
+                Rect.X = 0;
             }
-            if (rect.X > graphics.PreferredBackBufferWidth - rect.Width)
+            if (Rect.X > graphics.PreferredBackBufferWidth - Rect.Width)
             {
-                velocity.X = 0;
-                rect.X = graphics.PreferredBackBufferWidth - rect.Width;
+                Velocity.X = 0;
+                Rect.X = graphics.PreferredBackBufferWidth - Rect.Width;
             }
 
             //Physics
-            if (velocity.X > 0)
+            if (Velocity.X > 0)
             {
-                velocity.X -= FRICTION;
+                Velocity.X -= FRICTION;
             }
-            if (velocity.Y > 0)
+            if (Velocity.Y > 0)
             {
-                velocity.Y -= FRICTION;
+                Velocity.Y -= FRICTION;
             }
-            if (velocity.X < 0)
+            if (Velocity.X < 0)
             {
-                velocity.X += FRICTION;
+                Velocity.X += FRICTION;
             }
-            if (velocity.Y < 0)
+            if (Velocity.Y < 0)
             {
-                velocity.Y += FRICTION;
+                Velocity.Y += FRICTION;
             }
 
             //Final Update
-            if (velocity.Y < SPEEDCAP)
+            if (Velocity.Y < SPEEDCAP)
             {
-                rect.Y += (int)velocity.Y;
+                Rect.Y += (int)Velocity.Y;
             }
-            if (velocity.X < SPEEDCAP)
+            if (Velocity.X < SPEEDCAP)
             {
-                rect.X += (int)velocity.X;
+                Rect.X += (int)Velocity.X;
             }
         }
     }

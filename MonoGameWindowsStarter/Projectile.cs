@@ -24,6 +24,7 @@ namespace MonoGameWindowsStarter
         public float X;
         public float Y;
         public float Radius;
+        public Rectangle Rect;
 
         public Vector2 Velocity;
         public BoundingCircle hitBox;
@@ -48,9 +49,11 @@ namespace MonoGameWindowsStarter
             this.Y = y;
             this.Radius = radius;
             this.Velocity = velocity;
+            Console.WriteLine(this.Velocity);
             this.OffScreen = false;
             this.ShotType = shotType;
             this.hitBox = new BoundingCircle(x, y, radius);
+            this.Rect = new Rectangle((int)x, (int)y, (int)(radius * 2), (int)(radius * 2));
         }
 
         public void update(GraphicsDeviceManager graphics)
@@ -77,9 +80,14 @@ namespace MonoGameWindowsStarter
             //Physics
 
             //Final Update
-
-            this.Y += SPEED * (Velocity.Y / (Velocity.X + Velocity.Y));
-            this.X += SPEED * (Velocity.X / (Velocity.X + Velocity.Y));
+            //Console.WriteLine(Rect);
+            //Console.WriteLine(Velocity.X);
+            //Console.WriteLine(Velocity.Y);
+            X += Velocity.X;
+            Y += Velocity.Y;
+            Rect.X += (int)Velocity.X;
+            Rect.Y += (int)Velocity.Y;
+            //Console.WriteLine(Rect);
         }
     }
 }

@@ -12,6 +12,11 @@ namespace MonoGameWindowsStarter
     public class Game1 : Game
     {
         static int MAX_ENEMIES = 100;
+        static int PROJECTILE_SIZE = 10;
+        static int SHOT_RATE = 250;
+
+        bool createdEnemy = false;
+        Enemy testEnemy;
 
 
         GraphicsDeviceManager graphics;
@@ -19,6 +24,7 @@ namespace MonoGameWindowsStarter
         Random random = new Random();
 
         Texture2D projectileSprite;
+        Texture2D enemySprite;
         Texture2D dummySprite;
 
         Player player;
@@ -54,6 +60,7 @@ namespace MonoGameWindowsStarter
 
             projectiles = new List<Projectile>();
             enemies = new List<Enemy>();
+            testEnemy = new Enemy(enemySprite, new Rectangle(0, 0, 35, 35));
 
 
             base.Initialize();
@@ -70,6 +77,8 @@ namespace MonoGameWindowsStarter
 
             // TODO: use this.Content to load your game content here
             projectileSprite = Content.Load<Texture2D>("ball");
+            enemySprite = Content.Load<Texture2D>("OnePixel");
+            testEnemy.setSprite(enemySprite);
             player.setSprite(Content.Load<Texture2D>("OnePixel"));
         }
 
@@ -99,60 +108,78 @@ namespace MonoGameWindowsStarter
             if (Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            player.update(newKeyboardState, oldKeyboardState, graphics);
+            //Handle Deletion
             foreach(Enemy e in enemies)
             {
-                e.update(player, graphics);
+                if (e.Hit)
+                {
+                    enemies.Remove(e);
+                }
             }
             foreach(Projectile p in projectiles)
             {
-                p.update(graphics);
+                if (p.OffScreen)
+                {
+                    projectiles.Remove(p);
+                }
             }
 
-            manageCollision();
-
-
-
-
-
-
-
-
-
-
-            /*
-            // TODO: Add your update logic here
-            ballPosition += (float)gameTime.ElapsedGameTime.TotalMilliseconds * ballVelocity;
-
-            //Check for wall collisions
-            if(ballPosition.Y < 0)
+            //Handle Enemy Creation
+            if (!createdEnemy)
             {
-                ballVelocity.Y *= -1;
-                float delta = 0 - ballPosition.Y;
-                ballPosition.Y += 2 * delta;
+                enemies.Add(new Enemy(enemySprite, new Rectangle(0, 0, 35, 35)));
+                createdEnemy = true;
+            }
+            
+            //Handle Projectile Creation
+            if (newKeyboardState.IsKeyDown(Keys.Right) && !oldKeyboardState.IsKeyDown(Keys.Right) && gameTime.TotalGameTime.TotalMilliseconds - player.shotTime > SHOT_RATE)
+            {
+                projectiles.Add(new Projectile(projectileSprite, player.Rect.X + player.Rect.Width + PROJECTILE_SIZE, player.Rect.Y + (player.Rect.Height / 2), PROJECTILE_SIZE, player.Velocity, Shot.Player));
+                player.shotTime = gameTime.TotalGameTime.TotalMilliseconds;
+            }
+            if (newKeyboardState.IsKeyDown(Keys.Left) && !oldKeyboardState.IsKeyDown(Keys.Left) && gameTime.TotalGameTime.TotalMilliseconds - player.shotTime > SHOT_RATE)
+            {
+                projectiles.Add(new Projectile(projectileSprite, player.Rect.X - PROJECTILE_SIZE, player.Rect.Y + (player.Rect.Height / 2), PROJECTILE_SIZE, player.Velocity, Shot.Player));
+                player.shotTime = gameTime.TotalGameTime.TotalMilliseconds;
+            }
+            if (newKeyboardState.IsKeyDown(Keys.Up) && !oldKeyboardState.IsKeyDown(Keys.Up) && gameTime.TotalGameTime.TotalMilliseconds - player.shotTime > SHOT_RATE)
+            {
+                projectiles.Add(new Projectile(projectileSprite, player.Rect.X + (player.Rect.Width/2), player.Rect.Y - PROJECTILE_SIZE, PROJECTILE_SIZE, player.Velocity, Shot.Player));
+                player.shotTime = gameTime.TotalGameTime.TotalMilliseconds;
+            }
+            if (newKeyboardState.IsKeyDown(Keys.Down) && !oldKeyboardState.IsKeyDown(Keys.Down) && gameTime.TotalGameTime.TotalMilliseconds - player.shotTime > SHOT_RATE)
+            {
+                projectiles.Add(new Projectile(projectileSprite, player.Rect.X + (player.Rect.Width / 2), player.Rect.Y + player.Rect.Height + PROJECTILE_SIZE, PROJECTILE_SIZE, player.Velocity, Shot.Player));
+                player.shotTime = gameTime.TotalGameTime.TotalMilliseconds;
             }
 
-            if (ballPosition.Y > graphics.PreferredBackBufferHeight - 100)
+            //Update Positions
+            if (!player.Hit)
             {
-                ballVelocity.Y *= -1;
-                float delta = graphics.PreferredBackBufferHeight - 100 - ballPosition.Y;
-                ballPosition.Y += 2 * delta;
+                player.update(newKeyboardState, oldKeyboardState, graphics);
+                testEnemy.update(player, graphics);
+                foreach (Enemy e in enemies)
+                {
+                    //e.update(player, graphics);
+                }
+                foreach (Projectile p in projectiles)
+                {
+                    p.update(graphics);
+                }
+
+                manageCollision();
             }
 
-            if (ballPosition.X < 0)
-            {
-                ballVelocity.X *= -1;
-                float delta = 0 - ballPosition.X;
-                ballPosition.X += 2 * delta;
-            }
 
-            if (ballPosition.X > graphics.PreferredBackBufferWidth - 100)
-            {
-                ballVelocity.X *= -1;
-                float delta = graphics.PreferredBackBufferWidth - 100 - ballPosition.X;
-                ballPosition.X += 2 * delta;
-            }
-            */
+
+
+
+
+
+
+
+
+
 
             oldKeyboardState = newKeyboardState;
             base.Update(gameTime);
@@ -169,7 +196,15 @@ namespace MonoGameWindowsStarter
             // TODO: Add your drawing code here
             spriteBatch.Begin();
             // spriteBatch.Draw(ball, new Rectangle((int)ballPosition.X, (int)ballPosition.Y, 100, 100), Color.White);
-            spriteBatch.Draw(player.sprite, player.rect, Color.Red);
+            spriteBatch.Draw(player.Sprite, player.Rect, Color.Green);
+            foreach(Enemy e in enemies)
+            {
+                spriteBatch.Draw(e.Sprite, e.Rect, Color.Red);
+            }
+            foreach(Projectile p in projectiles)
+            {
+                spriteBatch.Draw(p.sprite, p.Rect, Color.White);
+            }
 
             // All draws in here
             spriteBatch.End();
@@ -179,7 +214,34 @@ namespace MonoGameWindowsStarter
 
         private void manageCollision()
         {
+            foreach(Projectile p in projectiles)
+            {
+                if(p.ShotType == Shot.Enemy)
+                {
+                    if(p.hitBox.CollidesWith(player.HitBox))
+                    {
+                        player.Hit = true;
+                    }
+                }
+                else
+                {
+                    foreach(Enemy e in enemies)
+                    {
+                        if (p.hitBox.CollidesWith(e.HitBox))
+                        {
+                            e.hit();
+                        }
+                    }
+                }
+            }
 
+            foreach(Enemy e in enemies)
+            {
+                if (e.HitBox.CollidesWith(player.HitBox))
+                {
+                    player.hit();
+                }
+            }
         }
     }
 }

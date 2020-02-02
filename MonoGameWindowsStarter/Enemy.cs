@@ -11,64 +11,72 @@ namespace MonoGameWindowsStarter
 {
     public struct Enemy
     {
-        static float ACCELERATION = 1;
-        static int SPEEDCAP = 10;
+        static float SPEEDCAP = 10;
 
-        public Texture2D sprite;
-        public Rectangle rect;
-        public Vector2 velocity;
-        public BoundingRectangle hitBox;
+        public Texture2D Sprite;
+        public Rectangle Rect;
+        public Vector2 Velocity;
+        public BoundingRectangle HitBox;
 
-        public Enemy(Texture2D sprite, Rectangle size, Vector2 velocity)
+        public bool Hit;
+
+        public Enemy(Texture2D sprite, Rectangle size)
         {
-            this.sprite = sprite;
-            this.rect = size;
-            this.velocity = velocity;
-            this.hitBox = new BoundingRectangle(size.X, size.Y, size.Width, size.Height);
+            this.Sprite = sprite;
+            this.Rect = size;
+            this.Velocity = new Vector2(0, 0);
+            this.HitBox = new BoundingRectangle(size.X, size.Y, size.Width, size.Height);
+            this.Hit = false;
+        }
+        public void setSprite(Texture2D sprite)
+        {
+            this.Sprite = sprite;
+        }
+
+        public void hit()
+        {
+            Hit = true;
         }
 
         public void update(Player player, GraphicsDeviceManager graphics)
         {
             //Player Tracking
             Vector2 playerDistence = trackPlayer(player);
-            this.velocity.Y += ACCELERATION * (playerDistence.Y / (playerDistence.X + playerDistence.Y));
-            this.velocity.X += ACCELERATION * (playerDistence.X / (playerDistence.X + playerDistence.Y));
+            
 
             //Enemy Restrictions
 
-            if (rect.Y < 0 - rect.Height)
+            if (Rect.Y < 0 - Rect.Height)
             {
-                rect.Y = 0 - rect.Height;
+                Rect.Y = 0 - Rect.Height;
             }
-            if (rect.Y > graphics.PreferredBackBufferHeight)
+            if (Rect.Y > graphics.PreferredBackBufferHeight)
             {
-                rect.Y = graphics.PreferredBackBufferHeight;
+                Rect.Y = graphics.PreferredBackBufferHeight;
             }
-            if (rect.X < 0 - rect.Width)
+            if (Rect.X < 0 - Rect.Width)
             {
-                rect.X = 0 - rect.Width;
+                Rect.X = 0 - Rect.Width;
             }
-            if (rect.X > graphics.PreferredBackBufferWidth)
+            if (Rect.X > graphics.PreferredBackBufferWidth)
             {
-                rect.X = graphics.PreferredBackBufferWidth;
+                Rect.X = graphics.PreferredBackBufferWidth;
             }
 
             //Physics
 
             //Final Update
-            if (velocity.Y < SPEEDCAP)
-            {
-                rect.Y += (int)velocity.Y;
-            }
-            if (velocity.X < SPEEDCAP)
-            {
-                rect.X += (int)velocity.X;
-            }
+            Console.WriteLine(Rect);
+            Console.WriteLine((int)(SPEEDCAP * (playerDistence.X / Math.Abs(playerDistence.X + playerDistence.Y))));
+            Console.WriteLine((int)(SPEEDCAP * (playerDistence.Y / Math.Abs(playerDistence.X + playerDistence.Y))));
+            Rect.X += (int)(SPEEDCAP * (playerDistence.X / Math.Abs(playerDistence.X + playerDistence.Y)));
+            Rect.Y += (int)(SPEEDCAP * (playerDistence.Y / Math.Abs(playerDistence.X + playerDistence.Y)));
+            Console.WriteLine(Rect);
         }
 
         private Vector2 trackPlayer(Player player)
         {
-            return new Vector2((player.rect.X + player.rect.Width/2) - this.rect.X, (player.rect.Y + player.rect.Height / 2) - this.rect.Y);
+            return new Vector2((player.Rect.X + player.Rect.Width/2) - this.Rect.X, (player.Rect.Y + player.Rect.Height / 2) - this.Rect.Y);
         }
     }
 }
