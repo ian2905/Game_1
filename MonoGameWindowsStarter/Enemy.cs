@@ -78,7 +78,7 @@ namespace MonoGameWindowsStarter
         {
             Console.WriteLine(player.Rect.X);
 
-            return new Vector2((player.Rect.X + player.Rect.Width / 2) - this.Rect.X, (player.Rect.Y + player.Rect.Height / 2) - this.Rect.Y);
+            return new Vector2((player.Rect.X + player.Rect.Width / 2) - (this.Rect.X + this.Rect.Width/2), (player.Rect.Y + player.Rect.Height / 2) - (this.Rect.Y + this.Rect.Height/2));
         }
     }
 }
