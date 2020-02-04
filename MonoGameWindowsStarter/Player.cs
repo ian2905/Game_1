@@ -6,117 +6,130 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Content;
 
 namespace MonoGameWindowsStarter
 {
     public class Player
     {
         static float FRICTION = (float).4;
-        static float ACCELERATION = (float).7;
+        static float ACCELERATION = (float).05;
         static int SPEEDCAP = 40;
+        static int SIZE = 32;
+        public Game game;
 
-        public Texture2D Sprite;
-        public Rectangle Rect;
-        public Vector2 Velocity;
-        public BoundingRectangle HitBox;
-        public bool Hit;
+        public Texture2D sprite;
+        public Vector2 velocity;
+        public BoundingRectangle hitBox;
+        public bool hit;
         public double shotTime;
 
-        public Player(Texture2D sprite, Rectangle size, Vector2 velocity)
+        public Player(Game game)
         {
-            this.Sprite = sprite;
-            this.Rect = size;
-            this.Velocity = velocity;
-            this.HitBox = new BoundingRectangle(size.X, size.Y, size.Width, size.Height);
-            this.Hit = false;
+            this.game = game;
+            this.velocity = new Vector2(0, 0);
+            this.hitBox = new BoundingRectangle(((game.GraphicsDevice.Viewport.Height / 2) - (SIZE / 2)), 
+                                                ((game.GraphicsDevice.Viewport.Width / 2) - (SIZE / 2)), 
+                                                SIZE, 
+                                                SIZE);
+            this.hit = false;
             this.shotTime = 0;
         }
 
-        public void setSprite(Texture2D sprite)
+        public void LoadContent(ContentManager content)
         {
-            this.Sprite = sprite;
+            sprite = content.Load<Texture2D>("OnePixel");
         }
 
-        public void hit()
+        public void Hit()
         {
-            Hit = true;
+            hit = true;
         }
 
-        public void update(KeyboardState newKeyboardState, KeyboardState oldKeyboardState, GraphicsDeviceManager graphics)
+        public void Update(GameTime gameTime)
         {
+            var keyboardState = Keyboard.GetState();
 
             //Keyboard Input
-            if (newKeyboardState.IsKeyDown(Keys.W))
+            if (velocity.Y > -1*SPEEDCAP) 
             {
-                Velocity.Y -= ACCELERATION;
+                if (keyboardState.IsKeyDown(Keys.W))
+                {
+                    velocity.Y -= ACCELERATION * (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+                }
             }
-
-            if (newKeyboardState.IsKeyDown(Keys.S))
+            if (velocity.Y < SPEEDCAP)
             {
-                Velocity.Y += ACCELERATION;
+                if (keyboardState.IsKeyDown(Keys.S))
+                {
+                    velocity.Y += ACCELERATION * (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+                }
             }
-            if (newKeyboardState.IsKeyDown(Keys.A))
+            if (velocity.X > -1*SPEEDCAP)
             {
-                Velocity.X -= ACCELERATION;
+                if (keyboardState.IsKeyDown(Keys.A))
+                {
+                    velocity.X -= ACCELERATION * (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+                }
             }
-
-            if (newKeyboardState.IsKeyDown(Keys.D))
+            if (velocity.X < SPEEDCAP)
             {
-                Velocity.X += ACCELERATION;
+                if (keyboardState.IsKeyDown(Keys.D))
+                {
+                    velocity.X += ACCELERATION * (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+                }
             }
-
             
 
             //Player Restrictions
 
-            if (Rect.Y < 0)
+            if (hitBox.Y < 0)
             {
-                Velocity.Y = 0;
-                Rect.Y = 0;
+                velocity.Y = 0;
+                hitBox.Y = 0;
             }
-            if (Rect.Y > graphics.PreferredBackBufferHeight - Rect.Height)
+            if (hitBox.Y > game.GraphicsDevice.Viewport.Height - hitBox.Height)
             {
-                Velocity.Y = 0;
-                Rect.Y = graphics.PreferredBackBufferHeight - Rect.Height;
+                velocity.Y = 0;
+                hitBox.Y = game.GraphicsDevice.Viewport.Height - hitBox.Height;
             }
-            if (Rect.X < 0)
+            if (hitBox.X < 0)
             {
-                Velocity.X = 0;
-                Rect.X = 0;
+                velocity.X = 0;
+                hitBox.X = 0;
             }
-            if (Rect.X > graphics.PreferredBackBufferWidth - Rect.Width)
+            if (hitBox.X > game.GraphicsDevice.Viewport.Width - hitBox.Width)
             {
-                Velocity.X = 0;
-                Rect.X = graphics.PreferredBackBufferWidth - Rect.Width;
+                velocity.X = 0;
+                hitBox.X = game.GraphicsDevice.Viewport.Width - hitBox.Width;
             }
 
             //Physics
-            if (Velocity.X > 0)
+            if (velocity.X > 0)
             {
-                Velocity.X -= FRICTION;
+                velocity.X -= FRICTION;
             }
-            if (Velocity.Y > 0)
+            if (velocity.Y > 0)
             {
-                Velocity.Y -= FRICTION;
+                velocity.Y -= FRICTION;
             }
-            if (Velocity.X < 0)
+            if (velocity.X < 0)
             {
-                Velocity.X += FRICTION;
+                velocity.X += FRICTION;
             }
-            if (Velocity.Y < 0)
+            if (velocity.Y < 0)
             {
-                Velocity.Y += FRICTION;
+                velocity.Y += FRICTION;
             }
 
             //Final Update
-            if (Velocity.Y < SPEEDCAP)
-            {
-                Rect.Y += (int)Velocity.Y;
-            }
-            if (Velocity.X < SPEEDCAP)
-            {
-                Rect.X += (int)Velocity.X;
-            }
+            hitBox.Y += (int)velocity.Y;
+            hitBox.X += (int)velocity.X;
+        }
+
+        public void Draw(SpriteBatch spriteBatch)
+        {
+            spriteBatch.Draw(sprite, hitBox, Color.Green);
         }
     }
 }

@@ -9,7 +9,7 @@ namespace MonoGameWindowsStarter
     /// <summary>
     /// This is the main type for your game.
     /// </summary>
-    public class Game1 : Game
+    public class Game : Microsoft.Xna.Framework.Game
     {
         static int MAX_ENEMIES = 100;
         static int MAX_PROJECTILES = 500;
@@ -39,7 +39,7 @@ namespace MonoGameWindowsStarter
         double enemyCounter = 0;
 
 
-        public Game1()
+        public Game()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
@@ -58,8 +58,7 @@ namespace MonoGameWindowsStarter
             graphics.PreferredBackBufferHeight = 768;
             graphics.ApplyChanges();
 
-            player = new Player(dummySprite, new Rectangle(graphics.PreferredBackBufferWidth / 2,
-                                            graphics.PreferredBackBufferHeight / 2, PLAYER_SIZE, PLAYER_SIZE), new Vector2(0, 0));
+            player = new Player(this);
 
             projectiles = new Projectile[MAX_PROJECTILES];
             enemies = new Enemy[MAX_ENEMIES];
@@ -80,7 +79,7 @@ namespace MonoGameWindowsStarter
             // TODO: use this.Content to load your game content here
             projectileSprite = Content.Load<Texture2D>("ball");
             enemySprite = Content.Load<Texture2D>("OnePixel");
-            player.setSprite(Content.Load<Texture2D>("OnePixel"));
+            player.LoadContent(Content);
         }
 
         /// <summary>
@@ -115,9 +114,9 @@ namespace MonoGameWindowsStarter
                 Vector2 spawnPoint = calcEnemySpawn();
                 for(int i = 0; i < MAX_ENEMIES; i++)
                 {
-                    if(enemies[i] == null || enemies[i].Hit)
+                    if(enemies[i] == null || enemies[i].hit)
                     {
-                        enemies[i] = new Enemy(enemySprite, new Rectangle((int)spawnPoint.X, (int)spawnPoint.Y, PLAYER_SIZE, PLAYER_SIZE));
+                        enemies[i] = new Enemy(this, enemySprite, new Vector2(spawnPoint.X, spawnPoint.Y));
                         break;
                     }
                 }
@@ -128,25 +127,29 @@ namespace MonoGameWindowsStarter
             createProjectiles(gameTime);
 
             //Update Positions
-            if (!player.Hit)
+            if (!player.hit)
             {
-                player.update(newKeyboardState, oldKeyboardState, graphics);
+                player.Update(gameTime);
                 foreach (Enemy e in enemies)
                 {
-                    if(e != null)
+                    if(e != null && !e.hit)
                     {
-                        e.update(player, graphics);
+                        e.Update(player);
                     }
                 }
                 foreach (Projectile p in projectiles)
                 {
-                    if(p != null)
+                    if(p != null && !p.offScreen)
                     {
-                        p.update(graphics);
+                        p.Update(graphics);
                     }
                 }
 
                 manageCollision();
+            }
+            else
+            {
+                Exit();
             }
 
 
@@ -165,20 +168,25 @@ namespace MonoGameWindowsStarter
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
-            // spriteBatch.Draw(ball, new Rectangle((int)ballPosition.X, (int)ballPosition.Y, 100, 100), Color.White);
-            spriteBatch.Draw(player.Sprite, player.Rect, Color.Green);
+            
+            //Player
+            player.Draw(spriteBatch);
+            
+            //Enemies
             foreach(Enemy e in enemies)
             {
-                if(e != null && !e.Hit)
+                if(e != null && !e.hit)
                 {
-                    spriteBatch.Draw(e.Sprite, e.Rect, Color.Red);
+                    e.Draw(spriteBatch);
                 }
             }
+            
+            //Projectiles
             foreach(Projectile p in projectiles)
             {
-                if(p != null && !p.OffScreen)
+                if(p != null && !p.offScreen)
                 {
-                    spriteBatch.Draw(p.sprite, p.Rect, Color.White);
+                    p.Draw(spriteBatch);
                 }
             }
 
@@ -195,14 +203,14 @@ namespace MonoGameWindowsStarter
             {
                 for (int i = 0; i < MAX_PROJECTILES; i++)
                 {
-                    if (projectiles[i] == null || projectiles[i].OffScreen)
+                    if (projectiles[i] == null || projectiles[i].offScreen)
                     {
-                        projectiles[i] = new Projectile(projectileSprite, player.Rect.X + player.Rect.Width, player.Rect.Y + (player.Rect.Height / 2) - (PROJECTILE_SIZE), PROJECTILE_SIZE, new Vector2(Math.Max(player.Velocity.X, 0) + PROJECTILE_SPEED, player.Velocity.Y), Shot.Player);
+                        projectiles[i] = new Projectile(projectileSprite, new BoundingCircle(player.hitBox.X + player.hitBox.Width, player.hitBox.Y + (player.hitBox.Height / 2) - (PROJECTILE_SIZE), PROJECTILE_SIZE), new Vector2(Math.Max(player.velocity.X, 0) + PROJECTILE_SPEED, player.velocity.Y / 2), Shot.Player);
                         break;
                     }
                     else if (i == MAX_PROJECTILES - 1)
                     {
-                        projectiles[0] = new Projectile(projectileSprite, player.Rect.X + player.Rect.Width, player.Rect.Y + (player.Rect.Height / 2) - (PROJECTILE_SIZE), PROJECTILE_SIZE, new Vector2(Math.Max(player.Velocity.X, 0) + PROJECTILE_SPEED, player.Velocity.Y), Shot.Player);
+                        projectiles[0] = new Projectile(projectileSprite, new BoundingCircle(player.hitBox.X + player.hitBox.Width, player.hitBox.Y + (player.hitBox.Height / 2) - (PROJECTILE_SIZE), PROJECTILE_SIZE) , new Vector2(Math.Max(player.velocity.X, 0) + PROJECTILE_SPEED, player.velocity.Y / 2), Shot.Player);
                     }
                 }
                 player.shotTime = gameTime.TotalGameTime.TotalMilliseconds;
@@ -212,14 +220,14 @@ namespace MonoGameWindowsStarter
             {
                 for (int i = 0; i < MAX_PROJECTILES; i++)
                 {
-                    if (projectiles[i] == null || projectiles[i].OffScreen)
+                    if (projectiles[i] == null || projectiles[i].offScreen)
                     {
-                        projectiles[i] = new Projectile(projectileSprite, player.Rect.X - 2 * PROJECTILE_SIZE, player.Rect.Y + (player.Rect.Height / 2) - (PROJECTILE_SIZE), PROJECTILE_SIZE, new Vector2(Math.Min(player.Velocity.X, 0) - PROJECTILE_SPEED, player.Velocity.Y), Shot.Player);
+                        projectiles[i] = new Projectile(projectileSprite, new BoundingCircle(player.hitBox.X - 2 * PROJECTILE_SIZE, player.hitBox.Y + (player.hitBox.Height / 2) - (PROJECTILE_SIZE), PROJECTILE_SIZE), new Vector2(Math.Min(player.velocity.X, 0) - PROJECTILE_SPEED, player.velocity.Y / 2), Shot.Player);
                         break;
                     }
                     else if (i == MAX_PROJECTILES - 1)
                     {
-                        projectiles[0] = new Projectile(projectileSprite, player.Rect.X - 2 * PROJECTILE_SIZE, player.Rect.Y + (player.Rect.Height / 2) - (PROJECTILE_SIZE), PROJECTILE_SIZE, new Vector2(Math.Min(player.Velocity.X, 0) - PROJECTILE_SPEED, player.Velocity.Y), Shot.Player);
+                        projectiles[0] = new Projectile(projectileSprite, new BoundingCircle(player.hitBox.X - 2 * PROJECTILE_SIZE, player.hitBox.Y + (player.hitBox.Height / 2) - (PROJECTILE_SIZE), PROJECTILE_SIZE), new Vector2(Math.Min(player.velocity.X, 0) - PROJECTILE_SPEED, player.velocity.Y / 2), Shot.Player);
                     }
                 }
                 player.shotTime = gameTime.TotalGameTime.TotalMilliseconds;
@@ -229,14 +237,14 @@ namespace MonoGameWindowsStarter
             {
                 for (int i = 0; i < MAX_PROJECTILES; i++)
                 {
-                    if (projectiles[i] == null || projectiles[i].OffScreen)
+                    if (projectiles[i] == null || projectiles[i].offScreen)
                     {
-                        projectiles[i] = new Projectile(projectileSprite, player.Rect.X + (player.Rect.Width / 2) - (PROJECTILE_SIZE), player.Rect.Y - 2 * PROJECTILE_SIZE, PROJECTILE_SIZE, new Vector2(player.Velocity.X, Math.Min(player.Velocity.Y, 0) - PROJECTILE_SPEED), Shot.Player);
+                        projectiles[i] = new Projectile(projectileSprite, new BoundingCircle(player.hitBox.X + (player.hitBox.Width / 2) - (PROJECTILE_SIZE), player.hitBox.Y - 2 * PROJECTILE_SIZE, PROJECTILE_SIZE), new Vector2(player.velocity.X / 2, Math.Min(player.velocity.Y, 0) - PROJECTILE_SPEED), Shot.Player);
                         break;
                     }
                     else if (i == MAX_PROJECTILES - 1)
                     {
-                        projectiles[0] = new Projectile(projectileSprite, player.Rect.X + (player.Rect.Width / 2) - (PROJECTILE_SIZE), player.Rect.Y - 2 * PROJECTILE_SIZE, PROJECTILE_SIZE, new Vector2(player.Velocity.X, Math.Min(player.Velocity.Y, 0) - PROJECTILE_SPEED), Shot.Player);
+                        projectiles[0] = new Projectile(projectileSprite, new BoundingCircle(player.hitBox.X + (player.hitBox.Width / 2) - (PROJECTILE_SIZE), player.hitBox.Y - 2 * PROJECTILE_SIZE, PROJECTILE_SIZE), new Vector2(player.velocity.X / 2, Math.Min(player.velocity.Y, 0) - PROJECTILE_SPEED), Shot.Player);
                     }
                 }
                 player.shotTime = gameTime.TotalGameTime.TotalMilliseconds;
@@ -246,14 +254,14 @@ namespace MonoGameWindowsStarter
             {
                 for (int i = 0; i < MAX_PROJECTILES; i++)
                 {
-                    if (projectiles[i] == null || projectiles[i].OffScreen)
+                    if (projectiles[i] == null || projectiles[i].offScreen)
                     {
-                        projectiles[i] = new Projectile(projectileSprite, player.Rect.X + (player.Rect.Width / 2) - (PROJECTILE_SIZE), player.Rect.Y + player.Rect.Height, PROJECTILE_SIZE, new Vector2(player.Velocity.X, Math.Max(player.Velocity.Y, 0) + PROJECTILE_SPEED), Shot.Player);
+                        projectiles[i] = new Projectile(projectileSprite, new BoundingCircle(player.hitBox.X + (player.hitBox.Width / 2) - (PROJECTILE_SIZE), player.hitBox.Y + player.hitBox.Height, PROJECTILE_SIZE), new Vector2(player.velocity.X / 2, Math.Max(player.velocity.Y, 0) + PROJECTILE_SPEED), Shot.Player);
                         break;
                     }
                     else if (i == MAX_PROJECTILES - 1)
                     {
-                        projectiles[0] = new Projectile(projectileSprite, player.Rect.X + (player.Rect.Width / 2) - (PROJECTILE_SIZE), player.Rect.Y + player.Rect.Height, PROJECTILE_SIZE, new Vector2(player.Velocity.X, Math.Max(player.Velocity.Y, 0) + PROJECTILE_SPEED), Shot.Player);
+                        projectiles[0] = new Projectile(projectileSprite, new BoundingCircle(player.hitBox.X + (player.hitBox.Width / 2) - (PROJECTILE_SIZE), player.hitBox.Y + player.hitBox.Height, PROJECTILE_SIZE), new Vector2(player.velocity.X / 2, Math.Max(player.velocity.Y, 0) + PROJECTILE_SPEED), Shot.Player);
                     }
                 }
                 player.shotTime = gameTime.TotalGameTime.TotalMilliseconds;
@@ -264,22 +272,23 @@ namespace MonoGameWindowsStarter
         {
             foreach(Projectile p in projectiles)
             {
-                if(p != null)
+                if(p != null && !p.offScreen)
                 {
-                    if (p.ShotType == Shot.Enemy)
+                    if (p.shotType == Shot.Enemy)
                     {
-                        if (p.hitBox.CollidesWith(player.HitBox))
+                        if (p.hitBox.CollidesWith(player.hitBox))
                         {
-                            player.Hit = true;
+                            player.Hit();
                         }
                     }
                     else
                     {
-                        foreach (Enemy e in enemies)
+                        foreach(Enemy e in enemies)
                         {
-                            if (e != null && p.hitBox.CollidesWith(e.HitBox))
+                            if (e != null && !e.hit && p.hitBox.CollidesWith(e.hitBox))
                             {
-                                e.hit();
+                                e.Hit();
+                                p.Delete();
                             }
                         }
                     }
@@ -288,9 +297,9 @@ namespace MonoGameWindowsStarter
 
             foreach(Enemy e in enemies)
             {
-                if (e != null && e.HitBox.CollidesWith(player.HitBox))
+                if (e != null && !e.hit && e.hitBox.CollidesWith(player.hitBox))
                 {
-                    player.hit();
+                    player.Hit();
                 }
             }
         }

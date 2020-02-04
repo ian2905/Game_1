@@ -6,79 +6,79 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Content;
 
 namespace MonoGameWindowsStarter
 {
     public class Enemy
     {
         static float SPEEDCAP = 2;
+        static int SIZE = 32;
 
-        public Texture2D Sprite;
-        public Rectangle Rect;
-        public Vector2 Velocity;
-        public BoundingRectangle HitBox;
+        public Game game;
+        public Texture2D sprite;
+        public Vector2 velocity;
+        public BoundingRectangle hitBox;
 
-        public bool Hit;
+        public bool hit;
 
-        public Enemy(Texture2D sprite, Rectangle size)
+        public Enemy(Game game, Texture2D sprite, Vector2 spawn)
         {
-            this.Sprite = sprite;
-            this.Rect = size;
-            this.Velocity = new Vector2(0, 0);
-            this.HitBox = new BoundingRectangle(size.X, size.Y, size.Width, size.Height);
-            this.Hit = false;
-        }
-        public void setSprite(Texture2D sprite)
-        {
-            this.Sprite = sprite;
+            this.game = game;
+            this.sprite = sprite;
+            this.velocity = new Vector2(0, 0);
+            this.hitBox = new BoundingRectangle(spawn.X, spawn.Y, SIZE, SIZE);
+            this.hit = false;
         }
 
-        public void hit()
+        public void Hit()
         {
-            Hit = true;
+            hit = true;
         }
 
-        public void update(Player player, GraphicsDeviceManager graphics)
+        private Vector2 TrackPlayer(Player player)
+        {
+            //Console.WriteLine(player.hitBox.X);
+
+            return new Vector2((player.hitBox.X + player.hitBox.Width / 2) - (hitBox.X + hitBox.Width / 2), (player.hitBox.Y + player.hitBox.Height / 2) - (hitBox.Y + hitBox.Height / 2));
+        }
+
+        public void Update(Player player)
         {
             //Player Tracking
-            Vector2 playerDistence = trackPlayer(player);
+            Vector2 playerDistence = TrackPlayer(player);
             
 
             //Enemy Restrictions
 
-            if (Rect.Y < 0 - Rect.Height)
+            if (hitBox.Y < 0 - hitBox.Height)
             {
-                Rect.Y = 0 - Rect.Height;
+                hitBox.Y = 0 - hitBox.Height;
             }
-            if (Rect.Y > graphics.PreferredBackBufferHeight)
+            if (hitBox.Y > game.GraphicsDevice.Viewport.Height)
             {
-                Rect.Y = graphics.PreferredBackBufferHeight;
+                hitBox.Y = game.GraphicsDevice.Viewport.Height;
             }
-            if (Rect.X < 0 - Rect.Width)
+            if (hitBox.X < 0 - hitBox.Width)
             {
-                Rect.X = 0 - Rect.Width;
+                hitBox.X = 0 - hitBox.Width;
             }
-            if (Rect.X > graphics.PreferredBackBufferWidth)
+            if (hitBox.X > game.GraphicsDevice.Viewport.Width)
             {
-                Rect.X = graphics.PreferredBackBufferWidth;
+                hitBox.X = game.GraphicsDevice.Viewport.Width;
             }
 
             //Physics
 
             //Final Update
-            //Console.WriteLine(Rect);
-            //Console.WriteLine((int)(SPEEDCAP * (playerDistence.X / Math.Abs(playerDistence.X + playerDistence.Y))));
-            //Console.WriteLine((int)(SPEEDCAP * (playerDistence.Y / Math.Abs(playerDistence.X + playerDistence.Y))));
-            Rect.X += (int)(SPEEDCAP * (playerDistence.X / Math.Abs(playerDistence.X + playerDistence.Y)));
-            Rect.Y += (int)(SPEEDCAP * (playerDistence.Y / Math.Abs(playerDistence.X + playerDistence.Y)));
-            //Console.WriteLine(Rect);
+            Console.WriteLine(playerDistence);
+            hitBox.X += SPEEDCAP * (playerDistence.X / (Math.Abs(playerDistence.X) + Math.Abs(playerDistence.Y)));
+            hitBox.Y += SPEEDCAP * (playerDistence.Y / (Math.Abs(playerDistence.X) + Math.Abs(playerDistence.Y)));
         }
 
-        private Vector2 trackPlayer(Player player)
+        public void Draw(SpriteBatch spriteBatch)
         {
-            Console.WriteLine(player.Rect.X);
-
-            return new Vector2((player.Rect.X + player.Rect.Width / 2) - (this.Rect.X + this.Rect.Width/2), (player.Rect.Y + player.Rect.Height / 2) - (this.Rect.Y + this.Rect.Height/2));
+            spriteBatch.Draw(sprite, hitBox, Color.Red);
         }
     }
 }

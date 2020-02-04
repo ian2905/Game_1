@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Content;
 
 namespace MonoGameWindowsStarter
 {
@@ -16,75 +17,65 @@ namespace MonoGameWindowsStarter
     }
     public class Projectile
     {
-
+        static int SIZE = 10;
 
         public Texture2D sprite;
-        public float X;
-        public float Y;
-        public float Radius;
-        public Rectangle Rect;
-
-        public Vector2 Velocity;
         public BoundingCircle hitBox;
+        public Rectangle rect;
 
-        public Shot ShotType;
-        public bool OffScreen;
+        public Vector2 velocity;
+
+        public Shot shotType;
+        public bool offScreen;
 
         public Vector2 Center
         {
-            get => new Vector2(X, Y);
-            set
-            {
-                X = value.X;
-                Y = value.Y;
-            }
+            get => new Vector2(hitBox.X, hitBox.Y);
         }
 
-        public Projectile(Texture2D sprite, float x, float y, float radius, Vector2 velocity, Shot shotType)
+        public Projectile(Texture2D sprite, BoundingCircle hitBox, Vector2 velocity, Shot shotType)
         {
             this.sprite = sprite;
-            this.X = x;
-            this.Y = y;
-            this.Radius = radius;
-            this.Velocity = velocity;
-            Console.WriteLine(this.Velocity);
-            this.OffScreen = false;
-            this.ShotType = shotType;
-            this.hitBox = new BoundingCircle(x, y, radius);
-            this.Rect = new Rectangle((int)x, (int)y, (int)(radius * 2), (int)(radius * 2));
+            this.hitBox = hitBox;
+            this.velocity = velocity;
+            this.offScreen = false;
+            this.shotType = shotType;
+            this.rect = new Rectangle((int)hitBox.X, (int)hitBox.Y, SIZE, SIZE);
         }
 
-        public void update(GraphicsDeviceManager graphics)
+        public void Delete()
+        {
+            offScreen = true;
+        }
+
+        public void Update(GraphicsDeviceManager graphics)
         {
             //Projectile Restrictions
 
-            if (this.Y < 0 - this.Radius)
+            if (hitBox.Y < 0 - hitBox.Radius)
             {
-                OffScreen = true;
+                offScreen = true;
             }
-            if (this.Y > graphics.PreferredBackBufferHeight + this.Radius)
+            if (hitBox.Y > graphics.PreferredBackBufferHeight + hitBox.Radius)
             {
-                OffScreen = true;
+                offScreen = true;
             }
-            if (this.X < 0 - this.Radius)
+            if (hitBox.X < 0 - hitBox.Radius)
             {
-                OffScreen = true;
+                offScreen = true;
             }
-            if (this.X > graphics.PreferredBackBufferWidth + this.Radius)
+            if (hitBox.X > graphics.PreferredBackBufferWidth + hitBox.Radius)
             {
-                OffScreen = true;
+                offScreen = true;
             }
 
             //Physics
 
             //Final Update
-            //Console.WriteLine(Rect);
-            //Console.WriteLine(Velocity.X);
-            //Console.WriteLine(Velocity.Y);
-            X += Velocity.X;
-            Y += Velocity.Y;
-            Rect.X += (int)Velocity.X;
-            Rect.Y += (int)Velocity.Y;
+            hitBox.X += velocity.X;
+            hitBox.Y += velocity.Y;
+            rect.X += (int)velocity.X;
+            rect.Y += (int)velocity.Y;
             /*
             if (Velocity.X != 0)
             {
@@ -105,6 +96,11 @@ namespace MonoGameWindowsStarter
             }
             //Console.WriteLine(Rect);
             */
+        }
+
+        public void Draw(SpriteBatch spriteBatch)
+        {
+            spriteBatch.Draw(sprite, rect, Color.White);
         }
     }
 }
