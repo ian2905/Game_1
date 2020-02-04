@@ -129,7 +129,14 @@ namespace MonoGameWindowsStarter
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(sprite, hitBox, Color.Green);
+            if (!hit)
+            {
+                spriteBatch.Draw(sprite, hitBox, Color.Green);
+            }
+            else
+            {
+                spriteBatch.Draw(sprite, hitBox, Color.DarkRed);
+            }
         }
     }
 }

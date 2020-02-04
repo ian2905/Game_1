@@ -15,8 +15,8 @@ namespace MonoGameWindowsStarter
         static int MAX_PROJECTILES = 500;
         static int PROJECTILE_SIZE = 10;
         static int PROJECTILE_SPEED = 5;
+        static int SPAWN_SPEED = 40;
         static int SHOT_RATE = 250;
-        static int ENEMY_SPAWN_RATE = 2000;
         static int PLAYER_SIZE = 32;
 
 
@@ -31,6 +31,8 @@ namespace MonoGameWindowsStarter
         Player player;
         Enemy[] enemies;
         Projectile[] projectiles;
+
+        int enemySpawnRate = 2000;
 
 
         KeyboardState oldKeyboardState;
@@ -109,7 +111,7 @@ namespace MonoGameWindowsStarter
                 Exit();
 
             //Handle Enemy Creation
-            if(gameTime.TotalGameTime.TotalMilliseconds - enemyCounter > ENEMY_SPAWN_RATE)
+            if(gameTime.TotalGameTime.TotalMilliseconds - enemyCounter > enemySpawnRate)
             {
                 Vector2 spawnPoint = calcEnemySpawn();
                 for(int i = 0; i < MAX_ENEMIES; i++)
@@ -124,7 +126,10 @@ namespace MonoGameWindowsStarter
             }
 
             //Handle Projectile Creation
-            createProjectiles(gameTime);
+            if (!player.hit)
+            {
+                createProjectiles(gameTime);
+            }
 
             //Update Positions
             if (!player.hit)
@@ -146,10 +151,6 @@ namespace MonoGameWindowsStarter
                 }
 
                 manageCollision();
-            }
-            else
-            {
-                Exit();
             }
 
 
@@ -289,6 +290,7 @@ namespace MonoGameWindowsStarter
                             {
                                 e.Hit();
                                 p.Delete();
+                                enemySpawnRate = Math.Max(enemySpawnRate - SPAWN_SPEED, SHOT_RATE + 100);
                             }
                         }
                     }
