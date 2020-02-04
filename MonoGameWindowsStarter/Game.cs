@@ -79,7 +79,7 @@ namespace MonoGameWindowsStarter
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
-            projectileSprite = Content.Load<Texture2D>("ball");
+            projectileSprite = Content.Load<Texture2D>("fireball");
             enemySprite = Content.Load<Texture2D>("OnePixel");
             player.LoadContent(Content);
         }
@@ -290,7 +290,7 @@ namespace MonoGameWindowsStarter
                             {
                                 e.Hit();
                                 p.Delete();
-                                enemySpawnRate = Math.Max(enemySpawnRate - SPAWN_SPEED, SHOT_RATE + 100);
+                                enemySpawnRate = Math.Max(enemySpawnRate - SPAWN_SPEED, SHOT_RATE + 140);
                             }
                         }
                     }
@@ -302,6 +302,16 @@ namespace MonoGameWindowsStarter
                 if (e != null && !e.hit && e.hitBox.CollidesWith(player.hitBox))
                 {
                     player.Hit();
+                    Console.WriteLine("Enemy:");
+                    Console.WriteLine(e.hitBox.X);
+                    Console.WriteLine(e.hitBox.Y);
+                    Console.WriteLine(e.hitBox.Width);
+                    Console.WriteLine(e.hitBox.Height);
+                    Console.WriteLine("Player:");
+                    Console.WriteLine(player.hitBox.X);
+                    Console.WriteLine(player.hitBox.Y);
+                    Console.WriteLine(player.hitBox.Width);
+                    Console.WriteLine(player.hitBox.Height);
                 }
             }
         }
@@ -315,12 +325,12 @@ namespace MonoGameWindowsStarter
                 return new Vector2(random.Next(0 - PLAYER_SIZE, graphics.PreferredBackBufferWidth + PLAYER_SIZE*2), 0 - PLAYER_SIZE);
             }
             //Right
-            else if (side == 0)
+            else if (side == 1)
             {
-                return new Vector2(graphics.PreferredBackBufferHeight + PLAYER_SIZE, random.Next(0 - PLAYER_SIZE, graphics.PreferredBackBufferHeight + PLAYER_SIZE));
+                return new Vector2(graphics.PreferredBackBufferWidth + PLAYER_SIZE, random.Next(0 - PLAYER_SIZE, graphics.PreferredBackBufferHeight + PLAYER_SIZE));
             }
             //Bottom
-            else if (side == 0)
+            else if (side == 2)
             {
                 return new Vector2(random.Next(0 - PLAYER_SIZE, graphics.PreferredBackBufferWidth + PLAYER_SIZE * 2), graphics.PreferredBackBufferHeight + PLAYER_SIZE);
             }

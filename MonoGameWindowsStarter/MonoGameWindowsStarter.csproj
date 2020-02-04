@@ -59,6 +59,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\ball.png" />
+    <Content Include="Content\fireball.png" />
     <Content Include="Content\OnePixel.png" />
     <Content Include="Icon.ico" />
   </ItemGroup>
