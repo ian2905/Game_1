@@ -17,7 +17,7 @@ namespace MonoGameWindowsStarter
     }
     public class Projectile
     {
-        static int SIZE = 10;
+        static int SIZE = 5;
 
         public Texture2D sprite;
         public BoundingCircle hitBox;
@@ -40,7 +40,7 @@ namespace MonoGameWindowsStarter
             this.velocity = velocity;
             this.offScreen = false;
             this.shotType = shotType;
-            this.rect = new Rectangle((int)hitBox.X, (int)hitBox.Y, SIZE, SIZE);
+            this.rect = new Rectangle((int)(hitBox.X - hitBox.Radius), (int)(hitBox.Y - hitBox.Radius), SIZE*2, SIZE*2);
         }
 
         public void Delete()

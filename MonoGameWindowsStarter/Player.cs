@@ -12,7 +12,7 @@ namespace MonoGameWindowsStarter
 {
     public class Player
     {
-        static float FRICTION = (float).4;
+        static float FRICTION = (float).5;
         static float ACCELERATION = (float).05;
         static int SPEEDCAP = 40;
         static int SIZE = 32;
