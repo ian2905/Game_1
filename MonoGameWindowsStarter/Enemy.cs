@@ -12,8 +12,8 @@ namespace MonoGameWindowsStarter
 {
     public class Enemy
     {
-        static float SPEEDCAP = 2;
-        static int SIZE = 32;
+        const float SPEEDCAP = 2;
+        const int SIZE = 32;
 
         public Game game;
         public Texture2D sprite;
@@ -71,7 +71,7 @@ namespace MonoGameWindowsStarter
             //Physics
 
             //Final Update
-            Console.WriteLine(playerDistence);
+            //Console.WriteLine(playerDistence);
             hitBox.X += SPEEDCAP * (playerDistence.X / (Math.Abs(playerDistence.X) + Math.Abs(playerDistence.Y)));
             hitBox.Y += SPEEDCAP * (playerDistence.Y / (Math.Abs(playerDistence.X) + Math.Abs(playerDistence.Y)));
         }

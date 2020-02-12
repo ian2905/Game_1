@@ -11,17 +11,18 @@ namespace MonoGameWindowsStarter
     /// </summary>
     public class Game : Microsoft.Xna.Framework.Game
     {
-        static int MAX_ENEMIES = 100;
-        static int MAX_PROJECTILES = 500;
-        static int PROJECTILE_SIZE = 5;
-        static int PROJECTILE_SPEED = 5;
-        static int SPAWN_SPEED = 40;
-        static int SHOT_RATE = 250;
-        static int PLAYER_SIZE = 32;
+        const int MAX_ENEMIES = 100;
+        const int MAX_PROJECTILES = 500;
+        const int PROJECTILE_SIZE = 5;
+        const int PROJECTILE_SPEED = 5;
+        const int SPAWN_SPEED = 40;
+        const int SHOT_RATE = 250;
+        const int PLAYER_SIZE = 32;
 
 
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        SpriteFont spriteFont;
         Random random = new Random();
 
         Texture2D projectileSprite;
@@ -77,6 +78,7 @@ namespace MonoGameWindowsStarter
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
+            spriteFont = Content.Load<SpriteFont>("Font");
 
             // TODO: use this.Content to load your game content here
             projectileSprite = Content.Load<Texture2D>("fireball");
@@ -171,7 +173,7 @@ namespace MonoGameWindowsStarter
             spriteBatch.Begin();
             
             //Player
-            player.Draw(spriteBatch);
+            player.Draw(spriteBatch, spriteFont);
             
             //Enemies
             foreach(Enemy e in enemies)
@@ -214,7 +216,7 @@ namespace MonoGameWindowsStarter
                         projectiles[0] = new Projectile(projectileSprite, new BoundingCircle(player.hitBox.X + player.hitBox.Width, player.hitBox.Y + (player.hitBox.Height / 2), PROJECTILE_SIZE) , new Vector2(Math.Max(player.velocity.X, 0) + PROJECTILE_SPEED, player.velocity.Y / 2), Shot.Player);
                     }
                 }
-                player.shotTime = gameTime.TotalGameTime.TotalMilliseconds;
+                player.Shoot(Face.Right, gameTime.TotalGameTime.TotalMilliseconds);
             }
             //Shoot Left
             if (newKeyboardState.IsKeyDown(Keys.Left) && !oldKeyboardState.IsKeyDown(Keys.Left) && gameTime.TotalGameTime.TotalMilliseconds - player.shotTime > SHOT_RATE)
@@ -231,7 +233,7 @@ namespace MonoGameWindowsStarter
                         projectiles[0] = new Projectile(projectileSprite, new BoundingCircle(player.hitBox.X - PROJECTILE_SIZE, player.hitBox.Y + (player.hitBox.Height / 2), PROJECTILE_SIZE), new Vector2(Math.Min(player.velocity.X, 0) - PROJECTILE_SPEED, player.velocity.Y / 2), Shot.Player);
                     }
                 }
-                player.shotTime = gameTime.TotalGameTime.TotalMilliseconds;
+                player.Shoot(Face.Left, gameTime.TotalGameTime.TotalMilliseconds);
             }
             //Shoot Up
             if (newKeyboardState.IsKeyDown(Keys.Up) && !oldKeyboardState.IsKeyDown(Keys.Up) && gameTime.TotalGameTime.TotalMilliseconds - player.shotTime > SHOT_RATE)
@@ -248,7 +250,7 @@ namespace MonoGameWindowsStarter
                         projectiles[0] = new Projectile(projectileSprite, new BoundingCircle(player.hitBox.X + (player.hitBox.Width / 2), player.hitBox.Y - PROJECTILE_SIZE, PROJECTILE_SIZE), new Vector2(player.velocity.X / 2, Math.Min(player.velocity.Y, 0) - PROJECTILE_SPEED), Shot.Player);
                     }
                 }
-                player.shotTime = gameTime.TotalGameTime.TotalMilliseconds;
+                player.Shoot(Face.Up, gameTime.TotalGameTime.TotalMilliseconds);
             }
             //Shoot Down
             if (newKeyboardState.IsKeyDown(Keys.Down) && !oldKeyboardState.IsKeyDown(Keys.Down) && gameTime.TotalGameTime.TotalMilliseconds - player.shotTime > SHOT_RATE)
@@ -265,7 +267,7 @@ namespace MonoGameWindowsStarter
                         projectiles[0] = new Projectile(projectileSprite, new BoundingCircle(player.hitBox.X + (player.hitBox.Width / 2), player.hitBox.Y + player.hitBox.Height, PROJECTILE_SIZE), new Vector2(player.velocity.X / 2, Math.Max(player.velocity.Y, 0) + PROJECTILE_SPEED), Shot.Player);
                     }
                 }
-                player.shotTime = gameTime.TotalGameTime.TotalMilliseconds;
+                player.Shoot(Face.Down, gameTime.TotalGameTime.TotalMilliseconds);
             }
         }
 

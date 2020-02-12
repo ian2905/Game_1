@@ -17,7 +17,7 @@ namespace MonoGameWindowsStarter
     }
     public class Projectile
     {
-        static int SIZE = 5;
+        const int SIZE = 5;
 
         public Texture2D sprite;
         public BoundingCircle hitBox;

@@ -10,35 +10,54 @@ using Microsoft.Xna.Framework.Content;
 
 namespace MonoGameWindowsStarter
 {
+    public enum Face
+    {
+        Down,
+        Right,
+        Left,
+        Up
+    }
     public class Player
     {
-        static float FRICTION = (float).5;
-        static float ACCELERATION = (float).05;
-        static int SPEEDCAP = 40;
-        static int SIZE = 32;
+        const float FRICTION = (float).5;
+        const float ACCELERATION = (float).05;
+        const int FRAME_WIDTH = 47;
+        const int FRAME_HEIGHT = 63;
+        const int ANIMATION_FRAME_RATE = 124;
+        const int SHOT_LOOK_TIME = 1240;
+        const int SPEEDCAP = 40;
+
         public Game game;
 
+        public double shotTime;
         public Texture2D sprite;
         public Vector2 velocity;
         public BoundingRectangle hitBox;
         public bool hit;
-        public double shotTime;
+        private Face face;
+        
+        public TimeSpan animationTimer;
+        public TimeSpan shotTimer;
+        int frame;
 
         public Player(Game game)
         {
             this.game = game;
-            this.velocity = new Vector2(0, 0);
-            this.hitBox = new BoundingRectangle(((game.GraphicsDevice.Viewport.Height / 2) - (SIZE / 2)), 
-                                                ((game.GraphicsDevice.Viewport.Width / 2) - (SIZE / 2)), 
-                                                SIZE, 
-                                                SIZE);
-            this.hit = false;
-            this.shotTime = 0;
+            velocity = new Vector2(0, 0);
+            hitBox = new BoundingRectangle(((game.GraphicsDevice.Viewport.Height / 2) - (FRAME_HEIGHT / 2)),
+                                                ((game.GraphicsDevice.Viewport.Width / 2) - (FRAME_WIDTH / 2)),
+                                                FRAME_WIDTH,
+                                                FRAME_HEIGHT);
+            shotTime = 0;
+            hit = false;
+            face = Face.Down;
+            animationTimer = new TimeSpan();
+            shotTimer = new TimeSpan();
         }
 
         public void LoadContent(ContentManager content)
         {
-            sprite = content.Load<Texture2D>("OnePixel");
+            sprite = content.Load<Texture2D>("playerSprite");
         }
 
         public void Hit()
@@ -46,16 +65,34 @@ namespace MonoGameWindowsStarter
             hit = true;
         }
 
+        public void Shoot(Face direction, double time)
+        {
+            shotTime = time;
+            shotTimer = new TimeSpan(0, 0, 0, 0, SHOT_LOOK_TIME);
+            face = direction;
+        }
+
         public void Update(GameTime gameTime)
         {
             var keyboardState = Keyboard.GetState();
 
+
+            Console.WriteLine(gameTime.TotalGameTime.Milliseconds);
             //Keyboard Input
             if (velocity.Y > -1*SPEEDCAP) 
             {
                 if (keyboardState.IsKeyDown(Keys.W))
                 {
                     velocity.Y -= ACCELERATION * (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+                    if (shotTimer.Milliseconds <= 0)
+                    {
+                        face = Face.Up;
+                        shotTimer = new TimeSpan();
+                    }
+                    else
+                    {
+                        shotTimer -= new TimeSpan(0, 0, 0, 0, ANIMATION_FRAME_RATE);
+                    }
                 }
             }
             if (velocity.Y < SPEEDCAP)
@@ -63,6 +100,15 @@ namespace MonoGameWindowsStarter
                 if (keyboardState.IsKeyDown(Keys.S))
                 {
                     velocity.Y += ACCELERATION * (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+                    if (shotTimer.Milliseconds <= 0)
+                    {
+                        face = Face.Down;
+                        shotTimer = new TimeSpan();
+                    }
+                    else
+                    {
+                        shotTimer -= new TimeSpan(0, 0, 0, 0, ANIMATION_FRAME_RATE);
+                    }
                 }
             }
             if (velocity.X > -1*SPEEDCAP)
@@ -70,6 +116,15 @@ namespace MonoGameWindowsStarter
                 if (keyboardState.IsKeyDown(Keys.A))
                 {
                     velocity.X -= ACCELERATION * (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+                    if (shotTimer.Milliseconds <= 0)
+                    {
+                        face = Face.Left;
+                        shotTimer = new TimeSpan();
+                    }
+                    else
+                    {
+                        shotTimer -= new TimeSpan(0, 0, 0, 0, ANIMATION_FRAME_RATE);
+                    }
                 }
             }
             if (velocity.X < SPEEDCAP)
@@ -77,6 +132,15 @@ namespace MonoGameWindowsStarter
                 if (keyboardState.IsKeyDown(Keys.D))
                 {
                     velocity.X += ACCELERATION * (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+                    if (shotTimer.Milliseconds <= 0)
+                    {
+                        face = Face.Right;
+                        shotTimer = new TimeSpan();
+                    }
+                    else
+                    {
+                        shotTimer -= new TimeSpan(0, 0, 0, 0, ANIMATION_FRAME_RATE);
+                    }
                 }
             }
             
@@ -122,20 +186,52 @@ namespace MonoGameWindowsStarter
                 velocity.Y += FRICTION;
             }
 
+            while (animationTimer.TotalMilliseconds > ANIMATION_FRAME_RATE)
+            {
+                Console.WriteLine(frame);
+                // increase by one frame
+                frame++;
+                // reduce the timer by one frame duration
+                animationTimer -= new TimeSpan(0, 0, 0, 0, ANIMATION_FRAME_RATE);
+            }
+            frame %= 4;
+
+
+
             //Final Update
             hitBox.Y += (int)velocity.Y;
             hitBox.X += (int)velocity.X;
+            if (Math.Abs(velocity.X) > 1 || Math.Abs(velocity.Y) > 1)
+            {
+                animationTimer += gameTime.ElapsedGameTime;
+            }
         }
 
-        public void Draw(SpriteBatch spriteBatch)
+        public void Draw(SpriteBatch spriteBatch, SpriteFont spriteFont)
         {
             if (!hit)
             {
-                spriteBatch.Draw(sprite, hitBox, Color.Green);
+                
+                spriteBatch.Draw(sprite, new Vector2(hitBox.X, hitBox.Y), new Rectangle(
+                                                        frame * FRAME_WIDTH,
+                                                        (int)face % 4 * FRAME_HEIGHT,
+                                                        FRAME_WIDTH,
+                                                        FRAME_HEIGHT), Color.White);
             }
             else
             {
-                spriteBatch.Draw(sprite, hitBox, Color.DarkRed);
+                spriteBatch.Draw(sprite, new Vector2(hitBox.X, hitBox.Y), new Rectangle(
+                                                        frame * FRAME_WIDTH,
+                                                        (int)face % 4 * FRAME_HEIGHT,
+                                                        FRAME_WIDTH,
+                                                        FRAME_HEIGHT), Color.DarkGreen);
+                spriteBatch.DrawString(
+                        spriteFont,
+                        "GAME OVER",
+                        new Vector2((game.GraphicsDevice.Viewport.Width/2) - 100,
+                                    game.GraphicsDevice.Viewport.Height/ 3),
+                        Color.White
+                );
             }
         }
     }
