@@ -98,3 +98,15 @@
 /processorParam:TextureFormat=Color
 /build:playerSprite.png
 
+#begin song1.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:song1.wav
+
+#begin spoopy.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:spoopy.wav
+

@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Media;
 
 namespace MonoGameWindowsStarter
 {
@@ -31,7 +32,8 @@ namespace MonoGameWindowsStarter
         Texture2D dummySprite;
 
         Dictionary<string, SoundEffect> soundEffects = new Dictionary<string, SoundEffect>();
-
+        SoundEffect song;
+        bool playedSong = false;
         Player player;
         Enemy[] enemies;
         Projectile[] projectiles;
@@ -73,6 +75,7 @@ namespace MonoGameWindowsStarter
 
             base.Initialize();
         }
+        
 
         /// <summary>
         /// LoadContent will be called once per game and is the place to load
@@ -89,10 +92,10 @@ namespace MonoGameWindowsStarter
             enemySprite = Content.Load<Texture2D>("enemySprite");
 
             soundEffects.Add("EnemyHit", Content.Load<SoundEffect>("enemyHitSound"));
+            song = Content.Load<SoundEffect>("spoopy");
 
             player.LoadContent(Content);
         }
-
         /// <summary>
         /// UnloadContent will be called once per game and is the place to unload
         /// game-specific content.
@@ -118,6 +121,13 @@ namespace MonoGameWindowsStarter
 
             if (Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
+            if (!playedSong)
+            {
+                if (Keyboard.GetState().IsKeyDown(Keys.P))
+                {
+                    song.Play();
+                }
+            }
 
             //Handle Enemy Creation
             if(gameTime.TotalGameTime.TotalMilliseconds - enemyCounter > enemySpawnRate)
@@ -359,5 +369,6 @@ namespace MonoGameWindowsStarter
                 return new Vector2(0 - ENEMY_SIZE, random.Next(0 - ENEMY_SIZE, graphics.PreferredBackBufferHeight + ENEMY_SIZE));
             }
         }
+
     }
 }
