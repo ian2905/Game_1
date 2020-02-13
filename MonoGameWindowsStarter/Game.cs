@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Media;
 
 namespace MonoGameWindowsStarter
 {
@@ -18,7 +19,7 @@ namespace MonoGameWindowsStarter
         const int PROJECTILE_SPEED = 5;
         const int SPAWN_SPEED = 40;
         const int SHOT_RATE = 250;
-        const int PLAYER_SIZE = 32;
+        const int ENEMY_SIZE = 48;
 
 
         GraphicsDeviceManager graphics;
@@ -31,7 +32,7 @@ namespace MonoGameWindowsStarter
         Texture2D dummySprite;
 
         Dictionary<string, SoundEffect> soundEffects = new Dictionary<string, SoundEffect>();
-
+        Song song;
         Player player;
         Enemy[] enemies;
         Projectile[] projectiles;
@@ -86,7 +87,7 @@ namespace MonoGameWindowsStarter
 
             // TODO: use this.Content to load your game content here
             projectileSprite = Content.Load<Texture2D>("fireball");
-            enemySprite = Content.Load<Texture2D>("OnePixel");
+            enemySprite = Content.Load<Texture2D>("enemySprite");
 
             soundEffects.Add("EnemyHit", Content.Load<SoundEffect>("enemyHitSound"));
 
@@ -148,7 +149,7 @@ namespace MonoGameWindowsStarter
                 {
                     if(e != null && !e.hit)
                     {
-                        e.Update(player);
+                        e.Update(player, gameTime);
                     }
                 }
                 foreach (Projectile p in projectiles)
@@ -340,22 +341,22 @@ namespace MonoGameWindowsStarter
             //Top
             if(side == 0)
             {
-                return new Vector2(random.Next(0 - PLAYER_SIZE, graphics.PreferredBackBufferWidth + PLAYER_SIZE*2), 0 - PLAYER_SIZE);
+                return new Vector2(random.Next(0 - ENEMY_SIZE, graphics.PreferredBackBufferWidth + ENEMY_SIZE*2), 0 - ENEMY_SIZE);
             }
             //Right
             else if (side == 1)
             {
-                return new Vector2(graphics.PreferredBackBufferWidth + PLAYER_SIZE, random.Next(0 - PLAYER_SIZE, graphics.PreferredBackBufferHeight + PLAYER_SIZE));
+                return new Vector2(graphics.PreferredBackBufferWidth + ENEMY_SIZE, random.Next(0 - ENEMY_SIZE, graphics.PreferredBackBufferHeight + ENEMY_SIZE));
             }
             //Bottom
             else if (side == 2)
             {
-                return new Vector2(random.Next(0 - PLAYER_SIZE, graphics.PreferredBackBufferWidth + PLAYER_SIZE * 2), graphics.PreferredBackBufferHeight + PLAYER_SIZE);
+                return new Vector2(random.Next(0 - ENEMY_SIZE, graphics.PreferredBackBufferWidth + ENEMY_SIZE * 2), graphics.PreferredBackBufferHeight + ENEMY_SIZE);
             }
             //Left
             else
             {
-                return new Vector2(0 - PLAYER_SIZE, random.Next(0 - PLAYER_SIZE, graphics.PreferredBackBufferHeight + PLAYER_SIZE));
+                return new Vector2(0 - ENEMY_SIZE, random.Next(0 - ENEMY_SIZE, graphics.PreferredBackBufferHeight + ENEMY_SIZE));
             }
         }
     }

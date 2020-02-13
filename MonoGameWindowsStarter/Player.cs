@@ -62,7 +62,7 @@ namespace MonoGameWindowsStarter
             face = Face.Down;
             animationTimer = new TimeSpan();
             shotTimer = new TimeSpan();
-
+            frame = 0;
         }
 
         public void LoadContent(ContentManager content)
