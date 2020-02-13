@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Audio;
 
 namespace MonoGameWindowsStarter
 {
@@ -29,6 +30,8 @@ namespace MonoGameWindowsStarter
         Texture2D enemySprite;
         Texture2D dummySprite;
 
+        Dictionary<string, SoundEffect> soundEffects = new Dictionary<string, SoundEffect>();
+
         Player player;
         Enemy[] enemies;
         Projectile[] projectiles;
@@ -40,6 +43,7 @@ namespace MonoGameWindowsStarter
         KeyboardState newKeyboardState;
 
         double enemyCounter = 0;
+        int score = 0;
 
 
         public Game()
@@ -83,6 +87,9 @@ namespace MonoGameWindowsStarter
             // TODO: use this.Content to load your game content here
             projectileSprite = Content.Load<Texture2D>("fireball");
             enemySprite = Content.Load<Texture2D>("OnePixel");
+
+            soundEffects.Add("EnemyHit", Content.Load<SoundEffect>("enemyHitSound"));
+
             player.LoadContent(Content);
         }
 
@@ -192,6 +199,13 @@ namespace MonoGameWindowsStarter
                     p.Draw(spriteBatch);
                 }
             }
+            spriteBatch.DrawString(
+                        spriteFont,
+                        "SCORE: " + score,
+                        new Vector2(10,
+                                    10),
+                        Color.White
+                );
 
             // All draws in here
             spriteBatch.End();
@@ -291,7 +305,9 @@ namespace MonoGameWindowsStarter
                             if (e != null && !e.hit && p.hitBox.CollidesWith(e.hitBox))
                             {
                                 e.Hit();
+                                soundEffects["EnemyHit"].CreateInstance().Play();
                                 p.Delete();
+                                score++;
                                 enemySpawnRate = Math.Max(enemySpawnRate - SPAWN_SPEED, SHOT_RATE + 120);
                             }
                         }

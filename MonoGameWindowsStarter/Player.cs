@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Audio;
 
 namespace MonoGameWindowsStarter
 {
@@ -21,16 +22,23 @@ namespace MonoGameWindowsStarter
     {
         const float FRICTION = (float).5;
         const float ACCELERATION = (float).05;
-        const int FRAME_WIDTH = 47;
+        const int FRAME_WIDTH = 49;
         const int FRAME_HEIGHT = 63;
         const int ANIMATION_FRAME_RATE = 124;
         const int SHOT_LOOK_TIME = 1240;
         const int SPEEDCAP = 40;
 
+        public int[,] frameVectorX = { {0, 49, 101, 147}, {4, 49, 101, 147}, {4, 49, 101, 147}, {0, 49, 101, 147} };
+        public int[,] frameVectorY = { {3, 0, 3, 0}, {63, 63, 63, 63 }, {130, 130, 130, 130 }, {201, 197, 201, 197} };
+        public int[,] frameVectorW = { { 46, 50, 46, 50 }, { 38, 39, 38, 39 }, { 38, 39, 38, 39 }, { 45, 49, 45, 49 } };
+        public int[,] frameVectorH = { { 56, 62, 56, 62 }, { 64, 63, 64, 63 }, { 64, 63, 64, 63 }, { 58, 61, 58, 61 } };
+
+
         public Game game;
 
         public double shotTime;
         public Texture2D sprite;
+        Dictionary<string, SoundEffect> soundEffects;
         public Vector2 velocity;
         public BoundingRectangle hitBox;
         public bool hit;
@@ -38,7 +46,7 @@ namespace MonoGameWindowsStarter
         
         public TimeSpan animationTimer;
         public TimeSpan shotTimer;
-        int frame;
+        public int frame;
 
         public Player(Game game)
         {
@@ -49,20 +57,25 @@ namespace MonoGameWindowsStarter
                                                 FRAME_WIDTH,
                                                 FRAME_HEIGHT);
             shotTime = 0;
+            soundEffects = new Dictionary<string, SoundEffect>();
             hit = false;
             face = Face.Down;
             animationTimer = new TimeSpan();
             shotTimer = new TimeSpan();
+
         }
 
         public void LoadContent(ContentManager content)
         {
             sprite = content.Load<Texture2D>("playerSprite");
+            soundEffects.Add("PlayerHit", content.Load<SoundEffect>("playerHit"));
+            soundEffects.Add("PlayerShoot", content.Load<SoundEffect>("playerShoot"));
         }
 
         public void Hit()
         {
             hit = true;
+            soundEffects["PlayerHit"].CreateInstance().Play();
         }
 
         public void Shoot(Face direction, double time)
@@ -70,6 +83,7 @@ namespace MonoGameWindowsStarter
             shotTime = time;
             shotTimer = new TimeSpan(0, 0, 0, 0, SHOT_LOOK_TIME);
             face = direction;
+            soundEffects["PlayerShoot"].CreateInstance().Play();
         }
 
         public void Update(GameTime gameTime)
@@ -195,16 +209,19 @@ namespace MonoGameWindowsStarter
                 animationTimer -= new TimeSpan(0, 0, 0, 0, ANIMATION_FRAME_RATE);
             }
             frame %= 4;
+            if (Math.Abs(velocity.X) > 1 || Math.Abs(velocity.Y) > 1)
+            {
+                animationTimer += gameTime.ElapsedGameTime;
+            }
 
 
 
             //Final Update
             hitBox.Y += (int)velocity.Y;
             hitBox.X += (int)velocity.X;
-            if (Math.Abs(velocity.X) > 1 || Math.Abs(velocity.Y) > 1)
-            {
-                animationTimer += gameTime.ElapsedGameTime;
-            }
+            hitBox.Width = frameVectorW[(int)face, frame];
+            hitBox.Height = frameVectorH[(int)face, frame];
+
         }
 
         public void Draw(SpriteBatch spriteBatch, SpriteFont spriteFont)
@@ -213,18 +230,18 @@ namespace MonoGameWindowsStarter
             {
                 
                 spriteBatch.Draw(sprite, new Vector2(hitBox.X, hitBox.Y), new Rectangle(
-                                                        frame * FRAME_WIDTH,
-                                                        (int)face % 4 * FRAME_HEIGHT,
-                                                        FRAME_WIDTH,
-                                                        FRAME_HEIGHT), Color.White);
+                                                        frameVectorX[(int)face, frame],
+                                                        frameVectorY[(int)face, frame],
+                                                        frameVectorW[(int)face, frame],
+                                                        frameVectorH[(int)face, frame]), Color.White);
             }
             else
             {
                 spriteBatch.Draw(sprite, new Vector2(hitBox.X, hitBox.Y), new Rectangle(
-                                                        frame * FRAME_WIDTH,
-                                                        (int)face % 4 * FRAME_HEIGHT,
-                                                        FRAME_WIDTH,
-                                                        FRAME_HEIGHT), Color.DarkGreen);
+                                                        frameVectorX[(int)face, frame],
+                                                        frameVectorY[(int)face, frame],
+                                                        frameVectorW[(int)face, frame],
+                                                        frameVectorH[(int)face, frame]), Color.DarkGreen);
                 spriteBatch.DrawString(
                         spriteFont,
                         "GAME OVER",
