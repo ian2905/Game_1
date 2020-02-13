@@ -4,7 +4,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Media;
 
 namespace MonoGameWindowsStarter
 {
@@ -32,7 +31,7 @@ namespace MonoGameWindowsStarter
         Texture2D dummySprite;
 
         Dictionary<string, SoundEffect> soundEffects = new Dictionary<string, SoundEffect>();
-        Song song;
+
         Player player;
         Enemy[] enemies;
         Projectile[] projectiles;
@@ -140,10 +139,11 @@ namespace MonoGameWindowsStarter
             {
                 createProjectiles(gameTime);
             }
-
+            
             //Update Positions
             if (!player.hit)
             {
+                manageCollision();
                 player.Update(gameTime);
                 foreach (Enemy e in enemies)
                 {
@@ -160,7 +160,7 @@ namespace MonoGameWindowsStarter
                     }
                 }
 
-                manageCollision();
+                
             }
 
 

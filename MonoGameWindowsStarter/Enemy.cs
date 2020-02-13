@@ -33,7 +33,7 @@ namespace MonoGameWindowsStarter
             this.game = game;
             this.sprite = sprite;
             velocity = new Vector2(0, 0);
-            //hitBox = new BoundingRectangle(spawn.X, spawn.Y, WIDTH, HEIGHT);
+            hitBox = new BoundingRectangle(spawn.X, spawn.Y, WIDTH, HEIGHT);
             hit = false;
             animationTimer = new TimeSpan();
             frame = 0;
